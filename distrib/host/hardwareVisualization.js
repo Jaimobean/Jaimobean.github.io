@@ -46,11 +46,12 @@ function updateCPUTable() {
 }
 function updatePCBTable() {
     var PCBcontents = document.getElementsByName("pcbContents");
-    PCBcontents[0].innerHTML = _PCB.PC.toString();
-    PCBcontents[1].innerHTML = _PCB.Acc.toString();
-    PCBcontents[2].innerHTML = _PCB.Xreg.toString();
-    PCBcontents[3].innerHTML = _PCB.Yreg.toString();
-    PCBcontents[4].innerHTML = _PCB.Zflag.toString();
+    PCBcontents[0].innerHTML = _PCB.PID.toString();
+    PCBcontents[1].innerHTML = _PCB.PC.toString();
+    PCBcontents[2].innerHTML = _PCB.Acc.toString();
+    PCBcontents[3].innerHTML = _PCB.Xreg.toString();
+    PCBcontents[4].innerHTML = _PCB.Yreg.toString();
+    PCBcontents[5].innerHTML = _PCB.Zflag.toString();
 }
 function formatHexNumb(numb, size) {
     var temp = numb.toString();

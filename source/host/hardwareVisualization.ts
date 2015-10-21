@@ -53,11 +53,12 @@ function updateCPUTable() {
 
 function updatePCBTable() {
     var PCBcontents = document.getElementsByName("pcbContents");
-    (<HTMLTableCellElement>PCBcontents[0]).innerHTML = _PCB.PC.toString();
-    (<HTMLTableCellElement>PCBcontents[1]).innerHTML = _PCB.Acc.toString();
-    (<HTMLTableCellElement>PCBcontents[2]).innerHTML = _PCB.Xreg.toString();
-    (<HTMLTableCellElement>PCBcontents[3]).innerHTML = _PCB.Yreg.toString();
-    (<HTMLTableCellElement>PCBcontents[4]).innerHTML = _PCB.Zflag.toString();
+    (<HTMLTableCellElement>PCBcontents[0]).innerHTML = _PCB.PID.toString();
+    (<HTMLTableCellElement>PCBcontents[1]).innerHTML = _PCB.PC.toString();
+    (<HTMLTableCellElement>PCBcontents[2]).innerHTML = _PCB.Acc.toString();
+    (<HTMLTableCellElement>PCBcontents[3]).innerHTML = _PCB.Xreg.toString();
+    (<HTMLTableCellElement>PCBcontents[4]).innerHTML = _PCB.Yreg.toString();
+    (<HTMLTableCellElement>PCBcontents[5]).innerHTML = _PCB.Zflag.toString();
 
 }
 
