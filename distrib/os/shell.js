@@ -381,9 +381,9 @@ var TSOS;
                 //_StdOut.putText("The User Program Input is valid.");
                 index = 0;
                 _CurrentSeg = _MemoryManager.checkFreeMem();
+                console.log("Current seg = " + _CurrentSeg);
                 _MemoryManager.setMemSegStartAdd(_CurrentSeg);
                 _MemoryManager.MMU[_CurrentSeg].isFree = false;
-                // _Memory.clearmem();
                 //go through input and add pairs of characters to memory
                 while (index < programInputLength) {
                     //if character is a digit 0-9, keep going
@@ -396,7 +396,7 @@ var TSOS;
                         if (tempstring.length == 2) {
                             //add to memory
                             _Memory.write(_NextMemoryAddress, tempstring);
-                            // console.log("Temp String = " +tempstring + " at mem[" +_NextMemoryAddress + "]");
+                            console.log("Temp String = " + tempstring + " at mem[" + _NextMemoryAddress + "]");
                             updateMemoryTable(_NextMemoryAddress, tempstring);
                             _NextMemoryAddress++;
                             //that segment of memory is no longer free
@@ -412,7 +412,7 @@ var TSOS;
                         //if the the string is in a pair reset the string
                         if (tempstring.length == 2) {
                             _Memory.write(_NextMemoryAddress, tempstring);
-                            //console.log("Temp String = " +tempstring + " at mem[" +_NextMemoryAddress + "]");
+                            console.log("Temp String = " + tempstring + " at mem[" + _NextMemoryAddress + "]");
                             updateMemoryTable(_NextMemoryAddress, tempstring);
                             _NextMemoryAddress++;
                             //console.log("temp string" + tempstring);
@@ -435,7 +435,7 @@ var TSOS;
                 //Update PID
                 _PID++;
             }
-            else {
+            else if (_MemoryManager.checkFreeMem() == -1) {
                 _StdOut.putText("Sorry there is no memory left to load a program.");
             }
         };
@@ -480,16 +480,24 @@ var TSOS;
             }
         };
         Shell.prototype.shellClearMem = function () {
-            _Memory.clearmem();
-            _MemoryManager.clearSeg(0);
-            _MemoryManager.clearSeg(1);
-            _MemoryManager.clearSeg(2);
-            _LoadedPrograms = [];
-            _CycleCounter = 0;
-            _ProgramCount = 0;
-            _ExecuteTime = 0;
-            resetMemoryTable();
-            _StdOut.putText("Memory has been cleared");
+            if (_ActiveArray.length > 0) {
+                _StdOut.putText("Cannot clear memory while processes are running. Please wait until programs finish executing.");
+            }
+            else {
+                _Memory.clearmem();
+                _MemoryManager.clearSeg(0);
+                _MemoryManager.clearSeg(1);
+                _MemoryManager.clearSeg(2);
+                _LoadedPrograms = [];
+                _CycleCounter = 0;
+                _ProgramCount = 0;
+                _ExecuteTime = 0;
+                resetMemoryTable();
+                clearCPUTable();
+                clearPCBTable();
+                _StdOut.putText("Memory has been cleared.");
+                console.log("mem manager base at 0 " + _MemoryManager.MMU[0].base);
+            }
         };
         Shell.prototype.shellRunAll = function () {
             if (_LoadedPrograms.length > 0) {
@@ -524,6 +532,7 @@ var TSOS;
         Shell.prototype.shellKill = function (args) {
             if (args[0] == _CurrentProcess.PID) {
                 _Kernel.killCurrentProcess();
+                _Kernel.removeProcessFromActiveArray(args[0]);
                 if (_ReadyQueue.getSize() > 0) {
                     _CPU.isExecuting = true;
                     _Kernel.roundRobin();

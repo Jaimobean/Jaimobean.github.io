@@ -44,6 +44,14 @@ function updateCPUTable() {
     CPUcontents[3].innerHTML = _CPU.Yreg.toString();
     CPUcontents[4].innerHTML = _CPU.Zflag.toString();
 }
+function clearCPUTable() {
+    var CPUcontents = document.getElementsByName("cpuContents");
+    CPUcontents[0].innerHTML = "";
+    CPUcontents[1].innerHTML = "";
+    CPUcontents[2].innerHTML = "";
+    CPUcontents[3].innerHTML = "";
+    CPUcontents[4].innerHTML = "";
+}
 function updatePCBTable(pcb) {
     var PCBcontents = document.getElementsByName("pcbContents");
     PCBcontents[0].innerHTML = pcb.PID.toString();
@@ -52,6 +60,15 @@ function updatePCBTable(pcb) {
     PCBcontents[3].innerHTML = pcb.Xreg.toString();
     PCBcontents[4].innerHTML = pcb.Yreg.toString();
     PCBcontents[5].innerHTML = pcb.Zflag.toString();
+}
+function clearPCBTable() {
+    var PCBcontents = document.getElementsByName("pcbContents");
+    PCBcontents[0].innerHTML = "";
+    PCBcontents[1].innerHTML = "";
+    PCBcontents[2].innerHTML = "";
+    PCBcontents[3].innerHTML = "";
+    PCBcontents[4].innerHTML = "";
+    PCBcontents[5].innerHTML = "";
 }
 function updateRQOneTable(pcb) {
     var RQOne = document.getElementsByName("RQ1");

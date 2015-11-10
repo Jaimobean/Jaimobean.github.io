@@ -21,19 +21,20 @@ var TSOS;
             this.isFree = _isFree;
         };
         MemoryDescriptor.prototype.clear = function (_segmentnum) {
-            if (_segmentnum = 0) {
+            console.log("clear seg num = " + _segmentnum);
+            if (_segmentnum == 0) {
                 this.base = 0;
                 this.limit = 255;
                 this.segmentnum = _segmentnum;
                 this.isFree = true;
             }
-            else if (_segmentnum = 1) {
+            else if (_segmentnum == 1) {
                 this.base = 256;
                 this.limit = 511;
                 this.segmentnum = _segmentnum;
                 this.isFree = true;
             }
-            else if (_segmentnum = 2) {
+            else if (_segmentnum == 2) {
                 this.base = 512;
                 this.limit = 767;
                 this.segmentnum = _segmentnum;
