@@ -81,9 +81,9 @@ var TSOS;
             _CPU.init(); //       There's more to do, like dealing with scheduling and such, but this would be a start. Pretty cool.
             //Create instance of PCB and update the table
             _PCB = new TSOS.ProcessControlBlock();
-            updatePCBTable();
             //Create instance of memory manager
             _MemoryManager = new TSOS.MemoryManager();
+            _MemoryManager.init();
             _Memory = new TSOS.Memory(); //initialize memory
             _Memory.init();
             // ... then set the host clock pulse ...

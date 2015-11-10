@@ -102,10 +102,10 @@ module TSOS {
 
             //Create instance of PCB and update the table
             _PCB = new ProcessControlBlock();
-            updatePCBTable();
 
             //Create instance of memory manager
             _MemoryManager = new MemoryManager();
+            _MemoryManager.init();
 
 
             _Memory = new Memory(); //initialize memory

@@ -44,8 +44,15 @@ var TSOS;
             _Kernel.krnTrace('CPU cycle');
             // TODO: Accumulate CPU usage and profiling statistics here.
             // Do the real work here. Be sure to set this.isExecuting appropriately.
+            var size = _ReadyQueue.getSize();
             //fetch
             if (this.isExecuting == true) {
+                _ExecuteTime = _ExecuteTime + 1;
+                if (size > 0) {
+                    for (var x = 0; x < size; x++) {
+                        _ReadyQueue.get(x).WaitTime = _ReadyQueue.get(x).WaitTime + 1;
+                    }
+                }
                 //decode and execute
                 this.decode(_Memory.read(this.PC));
             }
@@ -70,9 +77,18 @@ var TSOS;
                 var tempByteOne = _MemoryManager.getNextByte();
                 var tempByteTwo = _MemoryManager.getTwoBytesAhead();
                 var littleEndianAddress = tempByteTwo + tempByteOne;
-                var numberAddress = parseInt(littleEndianAddress, 16);
-                this.Acc = parseInt(_Memory.read(numberAddress));
+                var numberAddress = parseInt(littleEndianAddress, 16) + _CurrentProcess.Base;
+                if (_MemoryManager.isValidAddress(numberAddress) == true) {
+                    this.Acc = parseInt(_Memory.read(numberAddress));
+                }
+                else {
+                    TSOS.Control.hostLog("The address stored in Memory is not in the correct Memory slot.", "Cpu");
+                    _KernelInterruptQueue.enqueue(new TSOS.Interrupt(SYSTEMCALLBRK_IRQ, false));
+                    throw new Error("The address stored in Memory is not in the correct Memory slot.");
+                }
+                //Increment PC
                 this.PC = this.PC + 3;
+                //Update CPU table
                 updateCPUTable();
             }
             else if (opcode == '8D') {
@@ -80,11 +96,29 @@ var TSOS;
                 var tempByteOne = _MemoryManager.getNextByte();
                 var tempByteTwo = _MemoryManager.getTwoBytesAhead();
                 var littleEndianAddress = tempByteTwo + tempByteOne;
-                var numberAddress = parseInt(littleEndianAddress, 16);
-                _Memory.Mem[numberAddress] = this.Acc.toString(16);
+                var numberAddress = parseInt(littleEndianAddress, 16) + _CurrentProcess.Base;
+                if (_MemoryManager.isValidAddress(numberAddress) == true) {
+                    _Memory.Mem[numberAddress] = this.Acc.toString(16);
+                }
+                else {
+                    TSOS.Control.hostLog("Cannot store data in Memory. Trying to access different Memory slot.", "Cpu");
+                    _KernelInterruptQueue.enqueue(new TSOS.Interrupt(SYSTEMCALLBRK_IRQ, false));
+                    throw new Error("Cannot store data in Memory. Trying to access different Memory slot.");
+                }
+                //Increment PC
                 this.PC = this.PC + 3;
-                var format = formatHexNumb(this.Acc, 2);
+                var format;
+                if (this.Acc < 10) {
+                    format = formatHexNumb(this.Acc, 2);
+                    updateMemoryTable(numberAddress, format);
+                }
+                else {
+                    format = this.Acc.toString(16);
+                    updateMemoryTable(numberAddress, format);
+                }
+                //Update Memory Table
                 updateMemoryTable(numberAddress, format);
+                //Update CPU Table
                 updateCPUTable();
             }
             else if (opcode == '6D') {
@@ -94,15 +128,24 @@ var TSOS;
                 var tempByteOne = _MemoryManager.getNextByte();
                 var tempByteTwo = _MemoryManager.getTwoBytesAhead();
                 var littleEndianAddress = tempByteTwo + tempByteOne;
-                var numberAddress = parseInt(littleEndianAddress, 16);
-                temp = parseInt(_Memory.read(numberAddress), 16);
-                this.Acc = this.Acc + temp;
+                var numberAddress = parseInt(littleEndianAddress, 16) + _CurrentProcess.Base;
+                if (_MemoryManager.isValidAddress(numberAddress) == true) {
+                    temp = parseInt(_Memory.read(numberAddress), 16);
+                    this.Acc = this.Acc + temp;
+                }
+                else {
+                    TSOS.Control.hostLog("The address trying to be accessed is not in the correct Memory slot.", "Cpu");
+                    _KernelInterruptQueue.enqueue(new TSOS.Interrupt(SYSTEMCALLBRK_IRQ, false));
+                    throw new Error("The address trying to be accessed is not in the correct Memory slot.");
+                }
+                //Increment PC
                 this.PC = this.PC + 3;
+                //Update CPU table
                 updateCPUTable();
             }
             else if (opcode == 'A2') {
                 //Load the X register with a constant
-                this.Xreg = parseInt(_MemoryManager.getNextByte(), 16);
+                this.Xreg = parseInt(_MemoryManager.getNextByte(), 16) + _CurrentProcess.Base;
                 this.PC = this.PC + 2;
                 updateCPUTable();
             }
@@ -111,9 +154,18 @@ var TSOS;
                 var tempByteOne = _MemoryManager.getNextByte();
                 var tempByteTwo = _MemoryManager.getTwoBytesAhead();
                 var littleEndianAddress = tempByteTwo + tempByteOne;
-                var numberAddress = parseInt(littleEndianAddress, 16);
-                this.Xreg = parseInt(_Memory.Mem[numberAddress], 16);
+                var numberAddress = parseInt(littleEndianAddress, 16) + _CurrentProcess.Base;
+                if (_MemoryManager.isValidAddress(numberAddress) == true) {
+                    this.Xreg = parseInt(_Memory.Mem[numberAddress], 16);
+                }
+                else {
+                    TSOS.Control.hostLog("The address stored in Memory is not in the correct Memory slot.", "Cpu");
+                    _KernelInterruptQueue.enqueue(new TSOS.Interrupt(SYSTEMCALLBRK_IRQ, false));
+                    throw new Error("The address stored in Memory is not in the correct Memory slot.");
+                }
+                //Increment PC
                 this.PC = this.PC + 3;
+                //Update CPU table
                 updateCPUTable();
             }
             else if (opcode == 'A0') {
@@ -127,9 +179,18 @@ var TSOS;
                 var tempByteOne = _MemoryManager.getNextByte();
                 var tempByteTwo = _MemoryManager.getTwoBytesAhead();
                 var littleEndianAddress = tempByteTwo + tempByteOne;
-                var numberAddress = parseInt(littleEndianAddress, 16);
-                this.Yreg = parseInt(_Memory.Mem[numberAddress], 16);
+                var numberAddress = parseInt(littleEndianAddress, 16) + _CurrentProcess.Base;
+                if (_MemoryManager.isValidAddress(numberAddress) == true) {
+                    this.Yreg = parseInt(_Memory.Mem[numberAddress], 16);
+                }
+                else {
+                    TSOS.Control.hostLog("The address stored in Memory is not in the correct Memory slot.", "Cpu");
+                    _KernelInterruptQueue.enqueue(new TSOS.Interrupt(SYSTEMCALLBRK_IRQ, false));
+                    throw new Error("The address stored in Memory is not in the correct Memory slot.");
+                }
+                //Increment PC
                 this.PC = this.PC + 3;
+                //Update CPU table
                 updateCPUTable();
             }
             else if (opcode == 'EA') {
@@ -147,30 +208,43 @@ var TSOS;
                 var tempByteOne = _MemoryManager.getNextByte();
                 var tempByteTwo = _MemoryManager.getTwoBytesAhead();
                 var littleEndianAddress = tempByteTwo + tempByteOne;
-                var numberAddress = parseInt(littleEndianAddress, 16);
-                var data = parseInt(_Memory.read(numberAddress), 16);
-                if (this.Xreg == data) {
-                    this.Zflag = 1;
+                var numberAddress = parseInt(littleEndianAddress, 16) + _CurrentProcess.Base;
+                if (_MemoryManager.isValidAddress(numberAddress) == true) {
+                    var data = parseInt(_Memory.read(numberAddress), 16);
+                    if (this.Xreg >= _CurrentProcess.Base) {
+                        var sub = this.Xreg - _CurrentProcess.Base;
+                    }
+                    else {
+                        sub = this.Xreg;
+                    }
+                    if (sub == data) {
+                        this.Zflag = 1;
+                    }
+                    else {
+                        this.Zflag = 0;
+                    }
                 }
                 else {
-                    this.Zflag = 0;
+                    TSOS.Control.hostLog("The address stored in Memory is not in the correct Memory slot.", "Cpu");
+                    _KernelInterruptQueue.enqueue(new TSOS.Interrupt(SYSTEMCALLBRK_IRQ, false));
+                    throw new Error("The address stored in Memory is not in the correct Memory slot.");
                 }
+                //Increment PC
                 this.PC = this.PC + 3;
+                //Update CPU table
                 updateCPUTable();
             }
             else if (opcode == 'D0') {
                 //Branch n bytes if Z flag = 0
                 var tempByteOne = _MemoryManager.getNextByte();
                 var data = parseInt(tempByteOne, 16);
+                this.PC = this.PC + 2;
                 if (this.Zflag === 0) {
                     this.PC = this.PC + data;
-                    if (this.PC > 256) {
+                    if (this.PC > _CurrentProcess.Limit) {
                         this.PC = this.PC - 256;
+                        var sub = this.PC - _CurrentProcess.Base;
                     }
-                    this.PC = this.PC + 2;
-                }
-                else {
-                    this.PC = this.PC + 2;
                 }
                 updateCPUTable();
             }
@@ -179,20 +253,30 @@ var TSOS;
                 var tempByteOne = _MemoryManager.getNextByte();
                 var tempByteTwo = _MemoryManager.getTwoBytesAhead();
                 var littleEndianAddress = tempByteTwo + tempByteOne;
-                var numberAddress = parseInt(littleEndianAddress, 16);
-                var decimal = parseInt(_Memory.read(numberAddress), 16);
-                decimal = decimal + 1;
-                var hex = decimal.toString(16);
-                _Memory.Mem[numberAddress] = decimal.toString(16);
-                updateMemoryTable(numberAddress, hex);
+                var numberAddress = parseInt(littleEndianAddress, 16) + _CurrentProcess.Base;
+                if (_MemoryManager.isValidAddress(numberAddress) == true) {
+                    var decimal = parseInt(_Memory.read(numberAddress), 16);
+                    decimal = decimal + 1;
+                    var hex = decimal.toString(16);
+                    _Memory.Mem[numberAddress] = decimal.toString(16);
+                    updateMemoryTable(numberAddress, hex);
+                }
+                else {
+                    TSOS.Control.hostLog("The address stored in Memory is not in the correct Memory slot.", "Cpu");
+                    _KernelInterruptQueue.enqueue(new TSOS.Interrupt(SYSTEMCALLBRK_IRQ, false));
+                    throw new Error("The address stored in Memory is not in the correct Memory slot.");
+                }
+                //Increment PC
                 this.PC = this.PC + 3;
+                //Update CPU table
                 updateCPUTable();
             }
             else if (opcode == 'FF') {
                 //System Call
                 //#$01 in X reg = print the integer stored in the Y register.
                 //#$02 in X reg = print the 00-terminated string stored at the address in the Y register.
-                if (this.Xreg == 1) {
+                var sub = this.Xreg - _CurrentProcess.Base;
+                if (sub == 1) {
                     var yvalue = this.Yreg.toString();
                     for (var x = 0; x < yvalue.length; x++) {
                         _StdOut.putText(yvalue.charAt(x));
@@ -201,23 +285,38 @@ var TSOS;
                     _OsShell.putPrompt();
                     this.PC = this.PC + 1;
                 }
-                else if (this.Xreg == 2) {
-                    var numberAddress = this.Yreg;
-                    var current = _Memory.read(numberAddress);
-                    var keycode;
-                    var str = "";
-                    var x = 0;
-                    while (current !== "00") {
-                        keycode = parseInt(current, 16);
-                        str = str + String.fromCharCode(keycode);
-                        numberAddress = numberAddress + 1;
-                        current = _Memory.read(numberAddress);
-                        x++;
+                else if (sub == 2) {
+                    var numberAddress = this.Yreg + _CurrentProcess.Base;
+                    if (_MemoryManager.isValidAddress(numberAddress) == true) {
+                        var current = _Memory.read(numberAddress);
+                        var keycode;
+                        var str = "";
+                        var x = 0;
+                        while (current !== "00") {
+                            keycode = parseInt(current, 16);
+                            str = str + String.fromCharCode(keycode);
+                            numberAddress = numberAddress + 1;
+                            current = _Memory.read(numberAddress);
+                            x++;
+                        }
+                        _KernelInterruptQueue.enqueue(new TSOS.Interrupt(SYSTEMCALL_IRQ, str));
+                        this.PC = this.PC + 1;
                     }
-                    _KernelInterruptQueue.enqueue(new TSOS.Interrupt(SYSTEMCALL_IRQ, str));
+                    else {
+                        TSOS.Control.hostLog("The address stored in Memory is not in the correct Memory slot.", "Cpu");
+                        _KernelInterruptQueue.enqueue(new TSOS.Interrupt(SYSTEMCALLBRK_IRQ, false));
+                        throw new Error("The address stored in Memory is not in the correct Memory slot.");
+                    }
+                }
+                else {
                     this.PC = this.PC + 1;
                 }
                 updateCPUTable();
+            }
+            else {
+                TSOS.Control.hostLog("The opcode: " + opcode + " is invalid.", "Cpu");
+                _KernelInterruptQueue.enqueue(new TSOS.Interrupt(SYSTEMCALLBRK_IRQ, false));
+                throw new Error("The opcode: " + opcode + " is invalid.");
             }
         };
         return Cpu;

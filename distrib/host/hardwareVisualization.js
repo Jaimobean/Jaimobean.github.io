@@ -7,7 +7,7 @@ function initializeMemoryTable() {
     var currentrownum = -1;
     var currentLoc = 0;
     var memTable = document.getElementById("memoryTable");
-    for (var x = 0; x < 32; x++) {
+    for (var x = 0; x < 96; x++) {
         for (var y = 0; y < 9; y++) {
             cell = "00";
             var hexadecimal = (x * 8).toString(16);
@@ -32,7 +32,7 @@ function updateMemoryTable(address, text) {
     document.getElementById("L" + address).innerText = text;
 }
 function resetMemoryTable() {
-    for (var x = 0; x <= 255; x++) {
+    for (var x = 0; x <= 767; x++) {
         document.getElementById("L" + x).innerText = "00";
     }
 }
@@ -44,14 +44,105 @@ function updateCPUTable() {
     CPUcontents[3].innerHTML = _CPU.Yreg.toString();
     CPUcontents[4].innerHTML = _CPU.Zflag.toString();
 }
-function updatePCBTable() {
+function updatePCBTable(pcb) {
     var PCBcontents = document.getElementsByName("pcbContents");
-    PCBcontents[0].innerHTML = _PCB.PID.toString();
-    PCBcontents[1].innerHTML = _PCB.PC.toString();
-    PCBcontents[2].innerHTML = _PCB.Acc.toString();
-    PCBcontents[3].innerHTML = _PCB.Xreg.toString();
-    PCBcontents[4].innerHTML = _PCB.Yreg.toString();
-    PCBcontents[5].innerHTML = _PCB.Zflag.toString();
+    PCBcontents[0].innerHTML = pcb.PID.toString();
+    PCBcontents[1].innerHTML = pcb.PC.toString();
+    PCBcontents[2].innerHTML = pcb.Acc.toString();
+    PCBcontents[3].innerHTML = pcb.Xreg.toString();
+    PCBcontents[4].innerHTML = pcb.Yreg.toString();
+    PCBcontents[5].innerHTML = pcb.Zflag.toString();
+}
+function updateRQOneTable(pcb) {
+    var RQOne = document.getElementsByName("RQ1");
+    RQOne[0].innerHTML = pcb.PID.toString();
+    RQOne[1].innerHTML = pcb.PC.toString();
+    RQOne[2].innerHTML = pcb.Acc.toString();
+    RQOne[3].innerHTML = pcb.Xreg.toString();
+    RQOne[4].innerHTML = pcb.Yreg.toString();
+    RQOne[5].innerHTML = pcb.Zflag.toString();
+    RQOne[6].innerHTML = pcb.Base.toString();
+    RQOne[7].innerHTML = pcb.Limit.toString();
+    RQOne[8].innerHTML = pcb.Status.toString();
+}
+function clearRQRowTable(row) {
+    if (row == 1) {
+        var RQOne = document.getElementsByName("RQ1");
+        RQOne[0].innerHTML = "";
+        RQOne[1].innerHTML = "";
+        RQOne[2].innerHTML = "";
+        RQOne[3].innerHTML = "";
+        RQOne[4].innerHTML = "";
+        RQOne[5].innerHTML = "";
+        RQOne[6].innerHTML = "";
+        RQOne[7].innerHTML = "";
+        RQOne[8].innerHTML = "";
+    }
+    else if (row == 2) {
+        var RQTwo = document.getElementsByName("RQ2");
+        RQTwo[0].innerHTML = "";
+        RQTwo[1].innerHTML = "";
+        RQTwo[2].innerHTML = "";
+        RQTwo[3].innerHTML = "";
+        RQTwo[4].innerHTML = "";
+        RQTwo[5].innerHTML = "";
+        RQTwo[6].innerHTML = "";
+        RQTwo[7].innerHTML = "";
+        RQTwo[8].innerHTML = "";
+    }
+    else if (row == 3) {
+        var RQThree = document.getElementsByName("RQ3");
+        RQThree[0].innerHTML = "";
+        RQThree[1].innerHTML = "";
+        RQThree[2].innerHTML = "";
+        RQThree[3].innerHTML = "";
+        RQThree[4].innerHTML = "";
+        RQThree[5].innerHTML = "";
+        RQThree[6].innerHTML = "";
+        RQThree[7].innerHTML = "";
+        RQThree[8].innerHTML = "";
+    }
+}
+function moveRQTableRow(row, pcb) {
+    if (row == 1) {
+        var RQOne = document.getElementsByName("RQ1");
+        console.log("hardware pid = " + pcb.PID);
+        RQOne[0].innerHTML = pcb.PID.toString();
+        RQOne[1].innerHTML = pcb.PC.toString();
+        RQOne[2].innerHTML = pcb.Acc.toString();
+        RQOne[3].innerHTML = pcb.Xreg.toString();
+        RQOne[4].innerHTML = pcb.Yreg.toString();
+        RQOne[5].innerHTML = pcb.Zflag.toString();
+        RQOne[6].innerHTML = pcb.Base.toString();
+        RQOne[7].innerHTML = pcb.Limit.toString();
+        RQOne[8].innerHTML = pcb.Status.toString();
+    }
+    else if (row == 2) {
+        var RQTwo = document.getElementsByName("RQ2");
+        console.log("hardware pid = " + pcb.PID);
+        RQTwo[0].innerHTML = pcb.PID.toString();
+        RQTwo[1].innerHTML = pcb.PC.toString();
+        RQTwo[2].innerHTML = pcb.Acc.toString();
+        RQTwo[3].innerHTML = pcb.Xreg.toString();
+        RQTwo[4].innerHTML = pcb.Yreg.toString();
+        RQTwo[5].innerHTML = pcb.Zflag.toString();
+        RQTwo[6].innerHTML = pcb.Base.toString();
+        RQTwo[7].innerHTML = pcb.Limit.toString();
+        RQTwo[8].innerHTML = pcb.Status.toString();
+    }
+    else if (row == 3) {
+        var RQThree = document.getElementsByName("RQ3");
+        console.log("hardware pid = " + pcb.PID);
+        RQThree[0].innerHTML = pcb.PID.toString();
+        RQThree[1].innerHTML = pcb.PC.toString();
+        RQThree[2].innerHTML = pcb.Acc.toString();
+        RQThree[3].innerHTML = pcb.Xreg.toString();
+        RQThree[4].innerHTML = pcb.Yreg.toString();
+        RQThree[5].innerHTML = pcb.Zflag.toString();
+        RQThree[6].innerHTML = pcb.Base.toString();
+        RQThree[7].innerHTML = pcb.Limit.toString();
+        RQThree[8].innerHTML = pcb.Status.toString();
+    }
 }
 function formatHexNumb(numb, size) {
     var temp = numb.toString();

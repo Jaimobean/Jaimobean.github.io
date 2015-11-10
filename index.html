@@ -25,6 +25,7 @@
    <script type="text/javascript" src="distrib/os/console.js"></script>
    <script type="text/javascript" src="distrib/os/deviceDriver.js"></script>
    <script type="text/javascript" src="distrib/os/deviceDriverKeyboard.js"></script>
+   <script type="text/javascript" src="distrib/os/memoryDescriptor.js"></script>
    <script type="text/javascript" src="distrib/os/memoryManager.js"></script>
    <script type="text/javascript" src="distrib/os/queue.js"></script>
    <script type="text/javascript" src="distrib/os/processControlBlock.js"></script>
@@ -145,7 +146,7 @@
 
 
   </div>
-  <div id="divCPU" style = "height:150px; width:100px; overflow:auto; padding-left: 50px; padding-top: 0px;">
+  <div id="divCPU" style = "height:150px; width:100px; overflow:auto; padding-left: 50px; padding-bottom: 24px; display: inline-block;">
       <label>
           CPU
       </label>
@@ -174,7 +175,7 @@
   </div>
 
   </div>
-  <div id="divPCB" style = "height:175px; width:100px; overflow:auto; padding-left: 50px; padding-top: 10px;">
+  <div id="divPCB" style = "height:175px; width:100px; overflow:auto; padding-left: 50px; padding-top: 20px; display: inline-block">
       <label>
           PCB
       </label>
@@ -205,6 +206,58 @@
           </tr>
       </table>
   </div>
+
+  </div>
+  <div id="divRQ" style = "height:250px; width:auto; overflow:auto; padding-left: 50px; padding-top: 10px; float: bottom;">
+      <label>
+          Ready Queue
+      </label>
+      <table id="RQTable" border="1" bgcolor="white">
+          <th>PID</th>
+          <th>PC</th>
+          <th>ACC</th>
+          <th>X</th>
+          <th>Y</th>
+          <th>Z</th>
+          <th>Base</th>
+          <th>Limit</th>
+          <th>State</th>
+          <tr id="RQSlotOne">
+              <td name ="RQ1"></td>
+              <td name ="RQ1"></td>
+              <td name ="RQ1"></td>
+              <td name ="RQ1"></td>
+              <td name ="RQ1"></td>
+              <td name ="RQ1"></td>
+              <td name ="RQ1"></td>
+              <td name ="RQ1"></td>
+              <td name ="RQ1"></td>
+          </tr>
+          <tr id="RQSlotTwo">
+              <td name ="RQ2"></td>
+              <td name ="RQ2"></td>
+              <td name ="RQ2"></td>
+              <td name ="RQ2"></td>
+              <td name ="RQ2"></td>
+              <td name ="RQ2"></td>
+              <td name ="RQ2"></td>
+              <td name ="RQ2"></td>
+              <td name ="RQ2"></td>
+          </tr>
+          <tr id="RQSlotThree">
+              <td name ="RQ3"></td>
+              <td name ="RQ3"></td>
+              <td name ="RQ3"></td>
+              <td name ="RQ3"></td>
+              <td name ="RQ3"></td>
+              <td name ="RQ3"></td>
+              <td name ="RQ3"></td>
+              <td name ="RQ3"></td>
+              <td name ="RQ3"></td>
+          </tr>
+      </table>
+  </div>
+
 
   <p class="footerText" style="clear:both;">
      <br>

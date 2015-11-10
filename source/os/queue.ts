@@ -40,5 +40,13 @@ module TSOS {
             }
             return retVal;
         }
+
+        public get(pos) {
+            return this.q[pos];
+        }
+
+        public set(pos) {
+            this.q.splice(pos, 1);
+        }
     }
 }

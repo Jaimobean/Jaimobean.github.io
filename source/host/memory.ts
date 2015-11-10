@@ -2,13 +2,13 @@ module TSOS {
 
     export class Memory {
 
-        constructor(public Mem: string[] = Array(255)
+        constructor(public Mem: string[] = Array(_MemorySize)
         ) {
 
         }
         //initialize memory
         public init() {
-            for (var x = 0; x < 255; x++) {
+            for (var x = 0; x < _MemorySize; x++) {
                 this.Mem[x] = ("00");
             }
             _NextMemoryAddress = 0;
@@ -27,11 +27,11 @@ module TSOS {
 
         //clear memory
         public clearmem() {
-            for (var x = 0; x < 255; x++) {
+            for (var x = 0; x < _MemorySize; x++) {
                 this.Mem[x] = ("00");
             }
             _NextMemoryAddress = 0;
-            _MemoryManager.isFree = true;
+
         }
 
 

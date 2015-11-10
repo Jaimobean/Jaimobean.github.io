@@ -24,6 +24,8 @@ const SYSTEMCALL_IRQ: number = 2;
 
 const SYSTEMCALLBRK_IRQ: number = 3;
 
+const SCHEDULER_IRQ: number = 4;
+
 
 //
 // Global Variables
@@ -33,9 +35,18 @@ var _CPU: TSOS.Cpu;  // Utilize TypeScript's type annotation system to ensure th
 
 var _Memory: TSOS.Memory; // Memory
 
+var _MemorySize: number = 768;
+
+var _MemoryDescriptor: TSOS.MemoryDescriptor;
+
 var _MemoryManager: TSOS.MemoryManager; //Memory Manager
 
-var _OPCode; //Op code
+var _CurrentSeg: number = 0;
+
+var _CurrentProcess: TSOS.ProcessControlBlock;
+var _LoadedPrograms;
+
+var _ProcessFinished: boolean = false;
 
 var _OSclock: number = 0;  // Page 23.
 
@@ -58,6 +69,14 @@ var _KernelBuffers: any[] = null;   // when clearly 'any' is not what we want. T
 //Ready Queue array
 var _ReadyQueue: any = null;
 
+//Resident Queue array
+var _ResidentQueue: any = null;
+
+//Terminate Queue
+var _TerminatedQueue: any = null;
+
+var _ActiveArray;
+
 //var _ShellStatus = "Initialized";
 // Standard input and output
 var _StdIn;    // Same "to null or not to null" issue as above.
@@ -66,6 +85,16 @@ var _StdOut;
 // UI
 var _Console: TSOS.Console;
 var _OsShell: TSOS.Shell;
+
+//Quantum and Cycle Counter
+var _Quantum: number = 6;
+var _CycleCounter: number = 0;
+
+//Program Count
+var _ProgramCount = 0;
+
+//Time program has been executing
+var _ExecuteTime  = 0;
 
 //PCB
 var _PCB: TSOS.ProcessControlBlock;

@@ -11,6 +11,7 @@ C:\Users\Jengl\Documents\GitHub\TSOS-2015\source\os\deviceDriver.ts
 C:\Users\Jengl\Documents\GitHub\TSOS-2015\source\os\deviceDriverKeyboard.ts
 C:\Users\Jengl\Documents\GitHub\TSOS-2015\source\os\interrupt.ts
 C:\Users\Jengl\Documents\GitHub\TSOS-2015\source\os\kernel.ts
+C:\Users\Jengl\Documents\GitHub\TSOS-2015\source\os\memoryDescriptor.ts
 C:\Users\Jengl\Documents\GitHub\TSOS-2015\source\os\memoryManager.ts
 C:\Users\Jengl\Documents\GitHub\TSOS-2015\source\os\processControlBlock.ts
 C:\Users\Jengl\Documents\GitHub\TSOS-2015\source\os\queue.ts

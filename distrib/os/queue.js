@@ -37,6 +37,12 @@ var TSOS;
             }
             return retVal;
         };
+        Queue.prototype.get = function (pos) {
+            return this.q[pos];
+        };
+        Queue.prototype.set = function (pos) {
+            this.q.splice(pos, 1);
+        };
         return Queue;
     })();
     TSOS.Queue = Queue;
