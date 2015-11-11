@@ -43,7 +43,9 @@ var _MemoryManager: TSOS.MemoryManager; //Memory Manager
 
 var _CurrentSeg: number = 0;
 
-var _CurrentProcess: TSOS.ProcessControlBlock;
+var _CurrentProcess: TSOS.ProcessControlBlock; //Current Process PCB
+
+//Array of Loaded Programs
 var _LoadedPrograms;
 
 var _ProcessFinished: boolean = false;
@@ -75,6 +77,7 @@ var _ResidentQueue: any = null;
 //Terminate Queue
 var _TerminatedQueue: any = null;
 
+//Array storing Active Process PIDs
 var _ActiveArray;
 
 //var _ShellStatus = "Initialized";
@@ -90,7 +93,7 @@ var _OsShell: TSOS.Shell;
 var _Quantum: number = 6;
 var _CycleCounter: number = 0;
 
-//Program Count
+//Program Count used for Ready Queue Table
 var _ProgramCount = 0;
 
 //Time program has been executing

@@ -2,7 +2,7 @@
  * Created by Jengl on 10/6/2015.
  */
 
-
+//Initialize Memory Table
 function initializeMemoryTable() {
     var cell;
     var row;
@@ -31,16 +31,19 @@ function initializeMemoryTable() {
     }
 }
 
+//Update a certain cell in Memory Table
 function updateMemoryTable(address: number, text: string) {
     (<HTMLTableDataCellElement>document.getElementById("L" + address)).innerText = text;
 }
 
+//Reset Memory Table
 function resetMemoryTable() {
     for (var x = 0; x <= 767; x++) {
         (<HTMLTableDataCellElement>document.getElementById("L" + x)).innerText = "00";
     }
 }
 
+//Update CPU table with CPU contents
 function updateCPUTable() {
     var CPUcontents = document.getElementsByName("cpuContents");
         (<HTMLTableCellElement>CPUcontents[0]).innerHTML = _CPU.PC.toString();
@@ -51,6 +54,7 @@ function updateCPUTable() {
 
 }
 
+//Clear CPU table
 function clearCPUTable() {
     var CPUcontents = document.getElementsByName("cpuContents");
     (<HTMLTableCellElement>CPUcontents[0]).innerHTML = "";
@@ -61,6 +65,7 @@ function clearCPUTable() {
 
 }
 
+//Update PCB table with certain PCB
 function updatePCBTable(pcb) {
     var PCBcontents = document.getElementsByName("pcbContents");
     (<HTMLTableCellElement>PCBcontents[0]).innerHTML = pcb.PID.toString();
@@ -72,6 +77,7 @@ function updatePCBTable(pcb) {
 
 }
 
+//Clear PCB table
 function clearPCBTable(){
     var PCBcontents = document.getElementsByName("pcbContents");
     (<HTMLTableCellElement>PCBcontents[0]).innerHTML = "";
@@ -81,6 +87,8 @@ function clearPCBTable(){
     (<HTMLTableCellElement>PCBcontents[4]).innerHTML = "";
     (<HTMLTableCellElement>PCBcontents[5]).innerHTML = "";
 }
+
+//Update Ready Queue Table Row
 function updateRQOneTable(pcb) {
     var RQOne = document.getElementsByName("RQ1");
     (<HTMLTableCellElement>RQOne[0]).innerHTML = pcb.PID.toString();
@@ -94,6 +102,7 @@ function updateRQOneTable(pcb) {
     (<HTMLTableCellElement>RQOne[8]).innerHTML = pcb.Status.toString();
 }
 
+//Clear certain Ready Queue Row in Table
 function clearRQRowTable(row) {
     if (row == 1) {
         var RQOne = document.getElementsByName("RQ1");
@@ -134,6 +143,7 @@ function clearRQRowTable(row) {
 
 }
 
+//Move certain Process to different row of Ready Queue Table
 function moveRQTableRow(row, pcb){
     if (row == 1) {
         var RQOne = document.getElementsByName("RQ1");
@@ -177,7 +187,7 @@ function moveRQTableRow(row, pcb){
 }
 
 
-
+//Add extra digit to number for Hex representation
 function formatHexNumb(numb: number, size: number) {
     var temp = numb.toString();
     while (temp.length < size) {

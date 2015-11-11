@@ -29,7 +29,8 @@ var _MemorySize = 768;
 var _MemoryDescriptor;
 var _MemoryManager; //Memory Manager
 var _CurrentSeg = 0;
-var _CurrentProcess;
+var _CurrentProcess; //Current Process PCB
+//Array of Loaded Programs
 var _LoadedPrograms;
 var _ProcessFinished = false;
 var _OSclock = 0; // Page 23.
@@ -51,6 +52,7 @@ var _ReadyQueue = null;
 var _ResidentQueue = null;
 //Terminate Queue
 var _TerminatedQueue = null;
+//Array storing Active Process PIDs
 var _ActiveArray;
 //var _ShellStatus = "Initialized";
 // Standard input and output
@@ -62,7 +64,7 @@ var _OsShell;
 //Quantum and Cycle Counter
 var _Quantum = 6;
 var _CycleCounter = 0;
-//Program Count
+//Program Count used for Ready Queue Table
 var _ProgramCount = 0;
 //Time program has been executing
 var _ExecuteTime = 0;

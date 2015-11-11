@@ -149,17 +149,27 @@ module TSOS {
                     _OsShell.putPrompt();
                     break;
                 case SYSTEMCALLBRK_IRQ:
+                    //Calculate Turnaround Time
                     _CurrentProcess.TurnAroundTime = _CurrentProcess.TurnAroundTime + _ExecuteTime + _CurrentProcess.WaitTime;
+                    //Remove one from Program Count
                     _ProgramCount = _ProgramCount - 1;
+                    //Clear row from Ready Queue Table
                     clearRQRowTable(_ProgramCount);
+                    //Remove process from Active Array
                     _Kernel.removeProcessFromActiveArray(_CurrentProcess.PID);
+                    //Move current process to terminated queue
                     _Kernel.killCurrentProcess();
+                    //Reset Cycle Counter
                     _CycleCounter = 0;
+                    //Reset execute time var
                     _ExecuteTime = 0;
+
+                    //If there are still process in the ready queue, start round robin again
                     if (_ReadyQueue.getSize() > 0) {
                         _CPU.isExecuting = true;
                         _Kernel.roundRobin();
                     }
+                    //Else tell user that the programs are done executing
                     else {
                         if (_TerminatedQueue.getSize() > 1) {
                             _StdOut.putText("Programs are done executing.");
@@ -171,13 +181,17 @@ module TSOS {
                             _StdIn.advanceLine();
                             _OsShell.putPrompt();
                         }
+                        //Print the Turnaround Time and Wait time for each process in the Terminate Queue
                         for(var x = 0; x < _TerminatedQueue.getSize(); x++) {
                             _StdOut.putText("PID: " + _TerminatedQueue.get(x).PID + " Turnaround Time = " + _TerminatedQueue.get(x).TurnAroundTime + " Wait Time = " + _TerminatedQueue.get(x).WaitTime);
                             _StdIn.advanceLine();
                             _OsShell.putPrompt();
                         }
+                        //Clear the Ready Queue Table
                         clearRQRowTable(1);
+                        //Set isExecuting to false
                         _CPU.isExecuting = params;
+                        //Clear loaded programs arrray
                         _LoadedPrograms = [];
                     }
                     break;

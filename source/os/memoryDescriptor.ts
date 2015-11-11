@@ -5,6 +5,7 @@ module TSOS {
 
     export class MemoryDescriptor {
 
+        //Create object of Memory descriptor with properties of base, limit, segmentnum, and isFree
         constructor(public base:number = 0,
                     public limit:number = 0,
                     public segmentnum:number = 0,
@@ -12,6 +13,7 @@ module TSOS {
 
         }
 
+        //Function to initialize these values given input
         public init( _base: number, _limit: number, _segmentnum: number, _isFree: boolean) {
             this.base = _base;
             this.limit = _limit;
@@ -19,6 +21,7 @@ module TSOS {
             this.isFree = _isFree;
         }
 
+        //Reset values for certain segment of memory
         public clear(_segmentnum: number) {
             console.log("clear seg num = " + _segmentnum);
             if (_segmentnum == 0) {

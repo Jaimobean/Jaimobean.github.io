@@ -25,36 +25,31 @@ var TSOS;
         //Checks to see if there is a free segment in Memory, if yes return segment number, otherwise return -1
         MemoryManager.prototype.checkFreeMem = function () {
             if (this.MMU[0].isFree == true) {
-                console.log("at 0");
                 return 0;
             }
             else if (this.MMU[1].isFree == true) {
-                console.log("at 1");
                 return 1;
             }
             else if (this.MMU[2].isFree == true) {
-                console.log("at 2");
                 return 2;
             }
             else {
                 return -1;
             }
         };
+        //Sets the _NextMemoryAddress = to the segment's base
         MemoryManager.prototype.setMemSegStartAdd = function (segmentnum) {
             if (segmentnum == 0) {
                 _NextMemoryAddress = this.MMU[0].base;
-                console.log("0 Next mem add = " + _NextMemoryAddress);
-                console.log("base = " + this.MMU[0].base);
             }
             else if (segmentnum == 1) {
                 _NextMemoryAddress = this.MMU[1].base;
-                console.log("1 Next mem add = " + _NextMemoryAddress);
             }
             else if (segmentnum == 2) {
                 _NextMemoryAddress = this.MMU[2].base;
-                console.log("2 Next mem add = " + _NextMemoryAddress);
             }
         };
+        //Checks if address is inside of current process' segement
         MemoryManager.prototype.isValidAddress = function (address) {
             if (address >= _CurrentProcess.Base && address <= _CurrentProcess.Limit) {
                 return true;

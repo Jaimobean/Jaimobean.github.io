@@ -471,7 +471,6 @@ module TSOS {
                 //_StdOut.putText("The User Program Input is valid.");
                 index = 0;
                 _CurrentSeg = _MemoryManager.checkFreeMem();
-                console.log("Current seg = " + _CurrentSeg);
                 _MemoryManager.setMemSegStartAdd(_CurrentSeg);
                 _MemoryManager.MMU[_CurrentSeg].isFree = false;
 
@@ -489,7 +488,7 @@ module TSOS {
                         if (tempstring.length == 2) {
                             //add to memory
                             _Memory.write(_NextMemoryAddress, tempstring);
-                            console.log("Temp String = " +tempstring + " at mem[" +_NextMemoryAddress + "]");
+                            //console.log("Temp String = " +tempstring + " at mem[" +_NextMemoryAddress + "]");
                             updateMemoryTable(_NextMemoryAddress, tempstring);
                             _NextMemoryAddress++;
                             //that segment of memory is no longer free
@@ -509,7 +508,7 @@ module TSOS {
                         //if the the string is in a pair reset the string
                         if (tempstring.length == 2) {
                             _Memory.write(_NextMemoryAddress, tempstring);
-                            console.log("Temp String = " +tempstring + " at mem[" +_NextMemoryAddress + "]");
+                            //console.log("Temp String = " +tempstring + " at mem[" +_NextMemoryAddress + "]");
                             updateMemoryTable(_NextMemoryAddress, tempstring);
                             _NextMemoryAddress++;
 
@@ -567,9 +566,11 @@ module TSOS {
         public shellRun(args) {
             var temp;
             var exists = false;
+            //If there are loaded programs then check if the pid they gave is valid
             if (_LoadedPrograms.length > 0) {
                 for (var x = 0; x < _LoadedPrograms.length; x++) {
                     temp = _LoadedPrograms[x];
+                    //If pid is valid run process
                     if (parseInt(args[0]) == temp) {
                         exists = true;
                         _Kernel.putOneProcessOnReadyQueue(args[0]);
@@ -579,10 +580,12 @@ module TSOS {
                         break;
                     }
                 }
+                //If pid doesn't exist tell user they have entered an invalid pid
                 if (exists == false) {
                     _StdOut.putText("Invalid PID. Please enter a valid PID.");
                 }
             }
+            //If there are no loaded programs tell user
             else {
                 _StdOut.putText("Sorry, no programs have been loaded. Please load a program and try again.");
             }
@@ -590,33 +593,41 @@ module TSOS {
 
 
         public shellClearMem() {
+            //If there are active processes, don't allow user to clear memory
             if (_ActiveArray.length > 0) {
                 _StdOut.putText("Cannot clear memory while processes are running. Please wait until programs finish executing.");
             } else {
+                //Clear memory array
                 _Memory.clearmem();
+                //Reset all segments via memory manager
                 _MemoryManager.clearSeg(0);
                 _MemoryManager.clearSeg(1);
                 _MemoryManager.clearSeg(2);
+                //Clear loaded prgrams array
                 _LoadedPrograms = [];
+                //Reset cycle counter, program count, and execute time variables
                 _CycleCounter = 0;
                 _ProgramCount = 0;
                 _ExecuteTime  = 0;
+                //Clear all tables on html page
                 resetMemoryTable();
                 clearCPUTable();
                 clearPCBTable();
+                //Alert user that memory has been cleared
                 _StdOut.putText("Memory has been cleared.");
-                console.log("mem manager base at 0 " + _MemoryManager.MMU[0].base);
             }
 
         }
 
         public shellRunAll(){
+            //If there are loaded programs then start executing them
             if (_LoadedPrograms.length > 0) {
                 _Kernel.loadReadyQueue();
                 _Kernel.setCPUValuesFromPCB();
                 //set _Cpu.isExcuting = true
                 _CPU.isExecuting = true;
             }
+            //Otherwise alert user that there are no programs loaded
             else {
                 _StdOut.putText("Sorry, no programs have been loaded. Please load a program and try again.");
             }
@@ -625,21 +636,22 @@ module TSOS {
         }
 
         public shellQuantum(args) {
-        //change quantum
+            //change quantum
             _Quantum = parseInt(args[0]);
             _StdOut.putText("Quantum is now " + _Quantum);
         }
 
         public shellPS(){
             var text;
-
             var size = _ActiveArray.length;
+            //If there are active processes, loop through array and add to text string then print
             if (size > 0) {
                 text = "Active processes: ";
                 for (var x = 0; x < size; x++) {
                     text = text + _ActiveArray[x] + ", ";
                 }
             }
+            //Otherwise say there are no active processes
             else {
                 text = "There are no active processes.";
             }
@@ -648,22 +660,26 @@ module TSOS {
         }
 
         public shellKill(args) {
+            //If killing the Current Process, move to terminated queue and remove from active array
             if (args[0] == _CurrentProcess.PID) {
                 _Kernel.killCurrentProcess();
                 _Kernel.removeProcessFromActiveArray(args[0]);
+                //If there are still processes in ready queue continue round robin
                 if (_ReadyQueue.getSize() > 0) {
                     _CPU.isExecuting = true;
                     _Kernel.roundRobin();
                 }
+                //Otherwise clear the ready queue table and set isExecuting to false
                 else {
                     clearRQRowTable(1);
                     _CPU.isExecuting = false;
                 }
             }
+            //Else if it is another PID just remove it from the ready queue
             else {
                 _Kernel.removeProcessFromReadyQueue(args[0]);
             }
-
+            //Tell user and host log that process has been killed
             _StdOut.putText("Process " + args[0] + " has been killed.");
             Control.hostLog("Process " + args[0] + " killed.", "host");
         }

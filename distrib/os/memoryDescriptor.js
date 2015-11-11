@@ -4,6 +4,7 @@
 var TSOS;
 (function (TSOS) {
     var MemoryDescriptor = (function () {
+        //Create object of Memory descriptor with properties of base, limit, segmentnum, and isFree
         function MemoryDescriptor(base, limit, segmentnum, isFree) {
             if (base === void 0) { base = 0; }
             if (limit === void 0) { limit = 0; }
@@ -14,12 +15,14 @@ var TSOS;
             this.segmentnum = segmentnum;
             this.isFree = isFree;
         }
+        //Function to initialize these values given input
         MemoryDescriptor.prototype.init = function (_base, _limit, _segmentnum, _isFree) {
             this.base = _base;
             this.limit = _limit;
             this.segmentnum = _segmentnum;
             this.isFree = _isFree;
         };
+        //Reset values for certain segment of memory
         MemoryDescriptor.prototype.clear = function (_segmentnum) {
             console.log("clear seg num = " + _segmentnum);
             if (_segmentnum == 0) {
