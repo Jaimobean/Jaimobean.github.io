@@ -23,7 +23,6 @@ module TSOS {
 
         //Reset values for certain segment of memory
         public clear(_segmentnum: number) {
-            console.log("clear seg num = " + _segmentnum);
             if (_segmentnum == 0) {
                 this.base = 0;
                 this.limit = 255;

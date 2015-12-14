@@ -39,6 +39,49 @@ function resetMemoryTable() {
         document.getElementById("L" + x).innerText = "00";
     }
 }
+function initializeDiskTable() {
+    var cell;
+    var row;
+    var currentrownum = -1;
+    var currentLoc = 0;
+    var diskTable = document.getElementById("diskTable");
+    var key;
+    var track;
+    var sector;
+    var block;
+    var cell;
+    for (var t = 0; t < 4; t++) {
+        for (var s = 0; s < 8; s++) {
+            for (var b = 0; b < 8; b++) {
+                for (var x = 0; x < 2; x++) {
+                    track = t.toString();
+                    sector = s.toString();
+                    block = b.toString();
+                    key = track + ":" + sector + ":" + block;
+                    cell = sessionStorage.getItem(key);
+                    if (x == 0) {
+                        cell = "<th>" + key + "</th>";
+                        row = diskTable.insertRow(-1);
+                        row.insertCell(0).innerHTML = cell;
+                        currentrownum++;
+                    }
+                    else {
+                        var id = "D" + key;
+                        row = diskTable.rows[currentrownum];
+                        var newTD = row.insertCell(-1);
+                        newTD.innerHTML = cell;
+                        newTD.setAttribute('id', id);
+                        currentLoc++;
+                    }
+                }
+            }
+        }
+    }
+}
+//Update a certain cell in Disk Table
+function updateDiskTable(address, value) {
+    document.getElementById("D" + address).innerText = value;
+}
 //Update CPU table with CPU contents
 function updateCPUTable() {
     var CPUcontents = document.getElementsByName("cpuContents");
@@ -89,6 +132,7 @@ function updateRQOneTable(pcb) {
     RQOne[6].innerHTML = pcb.Base.toString();
     RQOne[7].innerHTML = pcb.Limit.toString();
     RQOne[8].innerHTML = pcb.Status.toString();
+    RQOne[9].innerHTML = pcb.Location.toString();
 }
 //Clear certain Ready Queue Row in Table
 function clearRQRowTable(row) {
@@ -103,6 +147,7 @@ function clearRQRowTable(row) {
         RQOne[6].innerHTML = "";
         RQOne[7].innerHTML = "";
         RQOne[8].innerHTML = "";
+        RQOne[9].innerHTML = "";
     }
     else if (row == 2) {
         var RQTwo = document.getElementsByName("RQ2");
@@ -115,6 +160,7 @@ function clearRQRowTable(row) {
         RQTwo[6].innerHTML = "";
         RQTwo[7].innerHTML = "";
         RQTwo[8].innerHTML = "";
+        RQTwo[9].innerHTML = "";
     }
     else if (row == 3) {
         var RQThree = document.getElementsByName("RQ3");
@@ -127,13 +173,13 @@ function clearRQRowTable(row) {
         RQThree[6].innerHTML = "";
         RQThree[7].innerHTML = "";
         RQThree[8].innerHTML = "";
+        RQThree[9].innerHTML = "";
     }
 }
 //Move certain Process to different row of Ready Queue Table
 function moveRQTableRow(row, pcb) {
     if (row == 1) {
         var RQOne = document.getElementsByName("RQ1");
-        console.log("hardware pid = " + pcb.PID);
         RQOne[0].innerHTML = pcb.PID.toString();
         RQOne[1].innerHTML = pcb.PC.toString();
         RQOne[2].innerHTML = pcb.Acc.toString();
@@ -143,10 +189,10 @@ function moveRQTableRow(row, pcb) {
         RQOne[6].innerHTML = pcb.Base.toString();
         RQOne[7].innerHTML = pcb.Limit.toString();
         RQOne[8].innerHTML = pcb.Status.toString();
+        RQOne[9].innerHTML = pcb.Location.toString();
     }
     else if (row == 2) {
         var RQTwo = document.getElementsByName("RQ2");
-        console.log("hardware pid = " + pcb.PID);
         RQTwo[0].innerHTML = pcb.PID.toString();
         RQTwo[1].innerHTML = pcb.PC.toString();
         RQTwo[2].innerHTML = pcb.Acc.toString();
@@ -156,10 +202,10 @@ function moveRQTableRow(row, pcb) {
         RQTwo[6].innerHTML = pcb.Base.toString();
         RQTwo[7].innerHTML = pcb.Limit.toString();
         RQTwo[8].innerHTML = pcb.Status.toString();
+        RQTwo[9].innerHTML = pcb.Location.toString();
     }
     else if (row == 3) {
         var RQThree = document.getElementsByName("RQ3");
-        console.log("hardware pid = " + pcb.PID);
         RQThree[0].innerHTML = pcb.PID.toString();
         RQThree[1].innerHTML = pcb.PC.toString();
         RQThree[2].innerHTML = pcb.Acc.toString();
@@ -169,6 +215,7 @@ function moveRQTableRow(row, pcb) {
         RQThree[6].innerHTML = pcb.Base.toString();
         RQThree[7].innerHTML = pcb.Limit.toString();
         RQThree[8].innerHTML = pcb.Status.toString();
+        RQThree[9].innerHTML = pcb.Location.toString();
     }
 }
 //Add extra digit to number for Hex representation

@@ -70,6 +70,15 @@ var TSOS;
             nextByte = _Memory.read(_CPU.PC + 2);
             return nextByte;
         };
+        MemoryManager.prototype.segmentToString = function (segnum) {
+            var data = "";
+            var counter = 0;
+            for (var x = this.MMU[segnum].base; x <= this.MMU[segnum].limit; x++) {
+                data = data + _Memory.read(x);
+                counter = counter + 1;
+            }
+            return data;
+        };
         return MemoryManager;
     })();
     TSOS.MemoryManager = MemoryManager;

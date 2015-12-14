@@ -45,8 +45,8 @@ module TSOS {
             return this.q[pos];
         }
 
-        public set(pos) {
-            this.q.splice(pos, 1);
+        public set(pos, value) {
+            this.q[pos] = value;
         }
     }
 }

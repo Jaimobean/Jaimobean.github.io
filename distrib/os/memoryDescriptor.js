@@ -24,7 +24,6 @@ var TSOS;
         };
         //Reset values for certain segment of memory
         MemoryDescriptor.prototype.clear = function (_segmentnum) {
-            console.log("clear seg num = " + _segmentnum);
             if (_segmentnum == 0) {
                 this.base = 0;
                 this.limit = 255;

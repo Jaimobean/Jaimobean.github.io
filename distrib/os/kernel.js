@@ -30,6 +30,7 @@ var TSOS;
             _LoadedPrograms = new Array(); // Loaded program PIDs, cleared after run command
             _TerminatedQueue = new TSOS.Queue(); // Where processes go after they die
             _ActiveArray = new Array(); // List of Active process PIDs
+            _PriorityQueue = new TSOS.Queue(); // To help sort programs by Priority
             // Initialize the console.
             _Console = new TSOS.Console(); // The command line interface / console I/O device.
             _Console.init();
@@ -41,6 +42,10 @@ var TSOS;
             _krnKeyboardDriver = new TSOS.DeviceDriverKeyboard(); // Construct it.
             _krnKeyboardDriver.driverEntry(); // Call the driverEntry() initialization routine.
             this.krnTrace(_krnKeyboardDriver.status);
+            //Load the File System Device Driver
+            _krnFileSystemDriver = new TSOS.DeviceDriverFileSystem();
+            _krnFileSystemDriver.driverEntry();
+            this.krnTrace(_krnFileSystemDriver.status);
             //
             // ... more?
             //
@@ -81,15 +86,22 @@ var TSOS;
                 this.krnInterruptHandler(interrupt.irq, interrupt.params);
             }
             else if (_CPU.isExecuting) {
-                // if c < q
-                if (_CycleCounter < _Quantum) {
-                    // c++
+                //Check which scheduler we are using
+                if (_Scheduler == "rr" || _Scheduler == "fcfs") {
+                    // if c < q
+                    if (_CycleCounter < _Quantum) {
+                        // c++
+                        _CycleCounter++;
+                        _CPU.cycle();
+                    }
+                    else {
+                        _CycleCounter = 0;
+                        _KernelInterruptQueue.enqueue(new TSOS.Interrupt(SCHEDULER_IRQ, null));
+                    }
+                }
+                else if (_Scheduler == "priority") {
                     _CycleCounter++;
                     _CPU.cycle();
-                }
-                else {
-                    _CycleCounter = 0;
-                    _KernelInterruptQueue.enqueue(new TSOS.Interrupt(SCHEDULER_IRQ, null));
                 }
             }
             else {
@@ -145,10 +157,17 @@ var TSOS;
                     _CycleCounter = 0;
                     //Reset execute time var
                     _ExecuteTime = 0;
+                    //Reset Highest Priority
+                    _HighestPriority = 1000000;
                     //If there are still process in the ready queue, start round robin again
                     if (_ReadyQueue.getSize() > 0) {
                         _CPU.isExecuting = true;
-                        _Kernel.roundRobin();
+                        if (_Scheduler == "rr" || _Scheduler == "fcfs") {
+                            _Kernel.roundRobin();
+                        }
+                        else if (_Scheduler == "priority") {
+                            _Kernel.priorityScheduling();
+                        }
                     }
                     else {
                         if (_TerminatedQueue.getSize() > 1) {
@@ -176,7 +195,13 @@ var TSOS;
                     }
                     break;
                 case SCHEDULER_IRQ:
-                    _Kernel.roundRobin();
+                    //Check which scheduler we are using
+                    if (_Scheduler == "rr" || _Scheduler == "fcfs") {
+                        _Kernel.roundRobin();
+                    }
+                    else if (_Scheduler == "priority") {
+                        _Kernel.priorityScheduling();
+                    }
                     break;
                 default:
                     this.krnTrapError("Invalid Interrupt Request. irq=" + irq + " params=[" + params + "]");
@@ -238,7 +263,7 @@ var TSOS;
             //call function that takes the next Program in the ready queue if there is one
             //else continue running current program
             if (_ReadyQueue.getSize() > 0) {
-                this.setCPUValuesFromPCB();
+                this.setCPUValuesFromPCB(_ReadyQueue.dequeue());
             }
             //Return to user mode
             _Mode = 1;
@@ -249,12 +274,78 @@ var TSOS;
             for (var x = 0; x < size; x++) {
                 var process = _ResidentQueue.dequeue();
                 process.Status = "Ready";
-                //update the Ready Queue table
+                //Update the Ready Queue table
                 moveRQTableRow(_ProgramCount, process);
+                //Add process to ready queue and PID to active array
                 _ReadyQueue.enqueue(process);
                 _ActiveArray.push(process.PID);
+                //Update the Ready Queue Table again
                 moveRQTableRow(x, process);
+                if (_LoadedPrograms.length == 1) {
+                    clearRQRowTable(1);
+                }
+                else if (_LoadedPrograms.length == 2) {
+                    clearRQRowTable(2);
+                }
             }
+        };
+        //Function that finds the program with highest priority
+        Kernel.prototype.findHighestPriority = function () {
+            var size = _ReadyQueue.getSize();
+            var processTwo = _ReadyQueue.get(1);
+            var highest;
+            for (var x = 0; x < size; x++) {
+                var processOne = _ReadyQueue.get(x);
+                if (x + 1 < size) {
+                    processTwo = _ReadyQueue.get(x + 1);
+                }
+                else {
+                    processTwo = processOne;
+                }
+                if (processOne.Priority < _HighestPriority) {
+                    _HighestPriority = processOne.Priority;
+                    highest = processOne;
+                    moveRQTableRow(x + 1, processTwo);
+                    if (x + 1 < size) {
+                        moveRQTableRow(x + 2, processOne);
+                    }
+                }
+            }
+            //remove highest priority from Ready queue
+            for (var y = 0; y < size; y++) {
+                var next = _ReadyQueue.dequeue();
+                if (next.PID !== highest.PID) {
+                    //update Ready Queue table
+                    moveRQTableRow(y + 1, next);
+                    //Put PCB back on ready queue
+                    _ReadyQueue.enqueue(next);
+                }
+            }
+            //update Ready Queue table
+            size = _ReadyQueue.getSize();
+            if (size == 0) {
+                clearRQRowTable(1);
+            }
+            else if (size == 1) {
+                clearRQRowTable(2);
+            }
+            else if (size == 2) {
+                clearRQRowTable(3);
+            }
+            return highest;
+        };
+        //Function that handles priority schedule
+        Kernel.prototype.priorityScheduling = function () {
+            //Change to kernel mode
+            _Mode = 0;
+            //call function that takes the next Program in the ready queue if there is one
+            //else continue running current program
+            if (_ReadyQueue.getSize() > 0) {
+                var next = _Kernel.findHighestPriority();
+                this.setCPUValuesFromPCB(next);
+            }
+            //Return to user mode
+            _Mode = 1;
         };
         //Function that puts one process on the ready queue given a PID
         Kernel.prototype.putOneProcessOnReadyQueue = function (pid) {
@@ -301,14 +392,76 @@ var TSOS;
         //Function that changes the current processes' state to terminated and adds it to the terminated queue
         Kernel.prototype.killCurrentProcess = function () {
             _CurrentProcess.Status = "Terminated";
-            updateRQOneTable(_CurrentProcess);
             updatePCBTable(_CurrentProcess);
             updateCPUTable();
             _TerminatedQueue.enqueue(_CurrentProcess);
         };
+        //Function that loads hex from a file into memory
+        Kernel.prototype.loadHexFromFileToMem = function (filename) {
+            var data = _krnFileSystemDriver.readFile(filename);
+            var counter = 0;
+            var temp = "";
+            for (var x = 0; x < data.length / 2; x++) {
+                temp = data.substr(counter, 2);
+                _Memory.Mem[_NextMemoryAddress] = temp;
+                updateMemoryTable(_NextMemoryAddress, temp);
+                _NextMemoryAddress++;
+                temp = "";
+                counter = counter + 2;
+            }
+        };
         //Function that does loads the CPU with the values from a PCB on the ready queue
-        Kernel.prototype.setCPUValuesFromPCB = function () {
-            _CurrentProcess = _ReadyQueue.dequeue();
+        Kernel.prototype.setCPUValuesFromPCB = function (current) {
+            _CurrentProcess = current;
+            //if it is on disk. remove the last run proc
+            if (_CurrentProcess.Location !== "In Memory") {
+                //Get last pcb on ready queue to swap
+                if (_TerminatedQueue.getSize() < 3) {
+                    var temp = _ReadyQueue.get(_ReadyQueue.getSize() - 1);
+                }
+                else {
+                    var temp = _TerminatedQueue.get(_TerminatedQueue.getSize() - 1);
+                }
+                //get swappable segnum
+                var segnum = temp.Segment;
+                //set nextmemaddress = the base of the swappable segment
+                _NextMemoryAddress = temp.Base;
+                //create string of memory data
+                var data = _MemoryManager.segmentToString(segnum);
+                _isProgram = true;
+                //create swap filename
+                _ProgramsOnDiskCount = _ProgramsOnDiskCount + 1;
+                var filename = "~ProgramOnDisk" + _ProgramsOnDiskCount;
+                //create file
+                _krnFileSystemDriver.createFile(filename);
+                //write data to file
+                _krnFileSystemDriver.writeFile(filename, data);
+                TSOS.Control.hostLog("PID " + temp.PID + "Swapped to Disk", "Kernel");
+                _MemoryManager.clearSeg(segnum);
+                //give the current process the available segnum, base, and limit
+                _CurrentProcess.Segment = segnum;
+                _CurrentProcess.Base = temp.Base;
+                _CurrentProcess.Limit = temp.Limit;
+                if (temp.Xreg > 10) {
+                    temp.Xreg = temp.Xreg - temp.Base;
+                }
+                if (_CurrentProcess.Xreg !== 0) {
+                    _CurrentProcess.Xreg = _CurrentProcess.Xreg + temp.Base;
+                }
+                //set the swapped pcb location to the filename, and segment, base, and limit to -1
+                temp.Location = filename;
+                temp.Segment = -1;
+                temp.Base = -1;
+                temp.Limit = -1;
+                //Swap file into memory
+                _Kernel.loadHexFromFileToMem(_CurrentProcess.Location);
+                TSOS.Control.hostLog("PID " + _CurrentProcess.PID + "Swapped to Memory", "Kernel");
+                //Delete old swap file
+                _krnFileSystemDriver.deleteFile(_CurrentProcess.Location);
+                //Set the current process location to now = in memory
+                _CurrentProcess.Location = "In Memory";
+                _isProgram = false;
+            }
             _CurrentProcess.PC = _CurrentProcess.PC + _CurrentProcess.Base;
             updatePCBTable(_CurrentProcess);
             _CPU.PC = _CurrentProcess.PC;
@@ -339,6 +492,13 @@ var TSOS;
                 moveRQTableRow(1, temp);
                 moveRQTableRow(size, newPCB);
                 clearRQRowTable(3);
+            }
+            else if (size >= 3) {
+                var temp = _ReadyQueue.get(1);
+                var temp2 = _ReadyQueue.get(2);
+                moveRQTableRow(1, temp);
+                moveRQTableRow(2, temp2);
+                moveRQTableRow(3, newPCB);
             }
             //Add to ready queue
             _ReadyQueue.enqueue(newPCB);

@@ -67,7 +67,7 @@ var TSOS;
             sc = new TSOS.ShellCommand(this.shellBlueScreen, "bluescreen", "- Displays BSOD");
             this.commandList[this.commandList.length] = sc;
             // load
-            sc = new TSOS.ShellCommand(this.shellLoad, "load", "- Loads User Input Programs");
+            sc = new TSOS.ShellCommand(this.shellLoad, "load", "<priority> - Loads programs user inputted with priority if given");
             this.commandList[this.commandList.length] = sc;
             // run
             sc = new TSOS.ShellCommand(this.shellRun, "run", "<PID> - Runs program with PID of <PID>.");
@@ -86,6 +86,30 @@ var TSOS;
             this.commandList[this.commandList.length] = sc;
             // kill <id> - kills the specified process id.
             sc = new TSOS.ShellCommand(this.shellKill, "kill", "<PID> - Kills Program with PID of </PID>");
+            this.commandList[this.commandList.length] = sc;
+            // format - initializes all tracks, sectors, and blocks
+            sc = new TSOS.ShellCommand(this.shellFormat, "format", "- Initializes all tracks, sectors and blocks on the disk");
+            this.commandList[this.commandList.length] = sc;
+            // setschedule - allows user to set cpu scheduling algorithm
+            sc = new TSOS.ShellCommand(this.shellSetScheduler, "setschedule", "<schedule> - User may choose cpu scheduling algorithms rr, fcfs, or priority");
+            this.commandList[this.commandList.length] = sc;
+            // getschedule - tells user the current cpu scheduling algorithm
+            sc = new TSOS.ShellCommand(this.shellGetScheduler, "getschedule", "- Tells user the current cpu scheduling algorithm");
+            this.commandList[this.commandList.length] = sc;
+            // create - allows user to create file with specified name
+            sc = new TSOS.ShellCommand(this.shellCreateFile, "create", "<filename> - File names must be less than 60 characters and contain no spaces.");
+            this.commandList[this.commandList.length] = sc;
+            // delete - allows user to delete file with specified name
+            sc = new TSOS.ShellCommand(this.shellDeleteFile, "delete", "<filename> - File name of file to be deleted.");
+            this.commandList[this.commandList.length] = sc;
+            // delete - allows user to delete file with specified name
+            sc = new TSOS.ShellCommand(this.shellWriteFile, "write", "<filename>, 'text' - Contents to be written to the file.");
+            this.commandList[this.commandList.length] = sc;
+            // read - allows user to read file with specified name
+            sc = new TSOS.ShellCommand(this.shellReadFile, "read", "<filename> - File name of file to read.");
+            this.commandList[this.commandList.length] = sc;
+            // ls - lists all file names in directory
+            sc = new TSOS.ShellCommand(this.shellListFiles, "ls", "- Lists all filenames in File System.");
             this.commandList[this.commandList.length] = sc;
             //
             // Display the initial prompt.
@@ -349,9 +373,7 @@ var TSOS;
             var msg = "Too Bad So Sad";
             _Kernel.krnTrapError(msg);
         };
-        Shell.prototype.shellLoad = function () {
-            _CPU.init();
-            updateCPUTable();
+        Shell.prototype.shellLoad = function (args) {
             var taProgramInput = document.getElementById("taProgramInput");
             var programInputLength = taProgramInput.value.length;
             var index = 0;
@@ -395,11 +417,9 @@ var TSOS;
                         if (tempstring.length == 2) {
                             //add to memory
                             _Memory.write(_NextMemoryAddress, tempstring);
-                            //console.log("Temp String = " +tempstring + " at mem[" +_NextMemoryAddress + "]");
                             updateMemoryTable(_NextMemoryAddress, tempstring);
                             _NextMemoryAddress++;
                             //that segment of memory is no longer free
-                            //console.log("temp string" + tempstring);
                             tempstring = "";
                         }
                     }
@@ -411,10 +431,8 @@ var TSOS;
                         //if the the string is in a pair reset the string
                         if (tempstring.length == 2) {
                             _Memory.write(_NextMemoryAddress, tempstring);
-                            //console.log("Temp String = " +tempstring + " at mem[" +_NextMemoryAddress + "]");
                             updateMemoryTable(_NextMemoryAddress, tempstring);
                             _NextMemoryAddress++;
-                            //console.log("temp string" + tempstring);
                             tempstring = "";
                         }
                     }
@@ -424,7 +442,10 @@ var TSOS;
                 }
                 //Program is done being loaded. Create PCB
                 var pcb = new TSOS.ProcessControlBlock();
-                pcb.init(_PID, _MemoryManager.MMU[_CurrentSeg].base, _CurrentSeg);
+                pcb.init(_PID, _MemoryManager.MMU[_CurrentSeg].base, _CurrentSeg, "In Memory");
+                if (args[0] !== undefined) {
+                    pcb.Priority = args[0];
+                }
                 _ProgramCount = _ProgramCount + 1;
                 //Add PCB to resident queue
                 _ResidentQueue.enqueue(pcb);
@@ -434,9 +455,115 @@ var TSOS;
                 //Update PID
                 _PID++;
             }
-            else if (_MemoryManager.checkFreeMem() == -1) {
-                _StdOut.putText("Sorry there is no memory left to load a program.");
+            else if (_ProgramCount >= 3) {
+                _isProgram = true;
+                var data = "";
+                if (_isFormatted == false) {
+                    _krnFileSystemDriver.formatDisk();
+                    initializeDiskTable();
+                }
+                var taProgramInput = document.getElementById("taProgramInput");
+                var programInputLength = taProgramInput.value.length;
+                var index = 0;
+                var tempstring = "";
+                //go through each character of user program input
+                while (index < programInputLength) {
+                    //if character is a digit 0-9, keep going
+                    if (parseInt(taProgramInput.value.substring(index, index + 1)) >= 0 || parseInt(taProgramInput.value.substring(index, index + 1)) <= 9) {
+                        index++;
+                    }
+                    else if (taProgramInput.value.substring(index, index + 1) == "a" || taProgramInput.value.substring(index, index + 1) == "b" || taProgramInput.value.substring(index, index + 1) == "c" || taProgramInput.value.substring(index, index + 1) == "d" || taProgramInput.value.substring(index, index + 1) == "e" || taProgramInput.value.substring(index, index + 1) == "f" || taProgramInput.value.substring(index, index + 1) == "A" || taProgramInput.value.substring(index, index + 1) == "B" || taProgramInput.value.substring(index, index + 1) == "C" || taProgramInput.value.substring(index, index + 1) == "D" || taProgramInput.value.substring(index, index + 1) == "E" || taProgramInput.value.substring(index, index + 1) == "F") {
+                        index++;
+                    }
+                    else if (taProgramInput.value.substring(index, index + 1) == " ") {
+                        index++;
+                    }
+                    else {
+                        _StdOut.putText("The User Program Input is Invalid. Please enter valid hexadecimal or space characters.");
+                        break;
+                    }
+                }
+                //if there is no input throw error
+                if (programInputLength == 0) {
+                    _StdOut.putText("The User Program Input is Invalid. Please enter valid hexadecimal or space characters.");
+                }
+                else if (index == programInputLength) {
+                    //_StdOut.putText("The User Program Input is valid.");
+                    index = 0;
+                    //go through input and add pairs of characters to memory
+                    while (index < programInputLength) {
+                        //if character is a digit 0-9, keep going
+                        if (parseInt(taProgramInput.value.substring(index, index + 1)) >= 0 || parseInt(taProgramInput.value.substring(index, index + 1)) <= 9) {
+                            //add character to temporary string
+                            tempstring = tempstring + taProgramInput.value.substring(index, index + 1);
+                            //add 1 to index
+                            index++;
+                            //if the the string is in a pair reset the string
+                            if (tempstring.length == 2) {
+                                data = data + tempstring;
+                                tempstring = "";
+                            }
+                        }
+                        else if (taProgramInput.value.substring(index, index + 1) == "a" || taProgramInput.value.substring(index, index + 1) == "b" || taProgramInput.value.substring(index, index + 1) == "c" || taProgramInput.value.substring(index, index + 1) == "d" || taProgramInput.value.substring(index, index + 1) == "e" || taProgramInput.value.substring(index, index + 1) == "f" || taProgramInput.value.substring(index, index + 1) == "A" || taProgramInput.value.substring(index, index + 1) == "B" || taProgramInput.value.substring(index, index + 1) == "C" || taProgramInput.value.substring(index, index + 1) == "D" || taProgramInput.value.substring(index, index + 1) == "E" || taProgramInput.value.substring(index, index + 1) == "F") {
+                            //add character to temporary string
+                            tempstring = tempstring + taProgramInput.value.substring(index, index + 1);
+                            //add 1 to index
+                            index++;
+                            //if the the string is in a pair reset the string
+                            if (tempstring.length == 2) {
+                                data = data + tempstring;
+                                tempstring = "";
+                                tempstring = "";
+                            }
+                        }
+                        else if (taProgramInput.value.substring(index, index + 1) == " ") {
+                            index++;
+                        }
+                    }
+                    var enoughSpace = true;
+                    for (var p = 0; p < 4; p++) {
+                        if (_krnFileSystemDriver.getNextAvailableDataBlock() == null) {
+                            enoughSpace = false;
+                        }
+                    }
+                    if (enoughSpace == true) {
+                        //Pad data
+                        if (data.length / 2 < 256) {
+                            for (var z = data.length / 2; z < 256; z++) {
+                                data = data + "00";
+                            }
+                        }
+                        //Create unique filename
+                        _ProgramsOnDiskCount = _ProgramsOnDiskCount + 1;
+                        var filename = "~ProgramOnDisk" + _ProgramsOnDiskCount;
+                        //create file
+                        _krnFileSystemDriver.createFile(filename);
+                        //Write program to disk
+                        _krnFileSystemDriver.writeFile(filename, data);
+                        //Program is done being loaded. Create PCB
+                        var pcb = new TSOS.ProcessControlBlock();
+                        pcb.init(_PID, -1, -1, filename);
+                        if (args[0] !== undefined) {
+                            pcb.Priority = args[0];
+                        }
+                        _ProgramCount = _ProgramCount + 1;
+                        //Add PCB to resident queue
+                        _ResidentQueue.enqueue(pcb);
+                        _LoadedPrograms.push(_PID);
+                        //Let user know the PID
+                        _StdOut.putText("PID = " + _PID);
+                        //Update PID
+                        _PID++;
+                    }
+                    else {
+                        _StdOut.putText("Sorry. There is not enough room on the disk to load this program. Please either format the disk to clear or delete some files.");
+                    }
+                    _isProgram = false;
+                }
             }
+            /*else if (_MemoryManager.checkFreeMem() == -1){
+                _StdOut.putText("Sorry there is no memory left to load a program.");
+            }*/
         };
         Shell.prototype.tabPressed = function (buffer) {
             var fullCommand = "";
@@ -466,7 +593,7 @@ var TSOS;
                     if (parseInt(args[0]) == temp) {
                         exists = true;
                         _Kernel.putOneProcessOnReadyQueue(args[0]);
-                        _Kernel.setCPUValuesFromPCB();
+                        _Kernel.setCPUValuesFromPCB(_ReadyQueue.dequeue());
                         _CPU.isExecuting = true;
                         _StdOut.putText("Running PID " + args[0]);
                         break;
@@ -483,7 +610,7 @@ var TSOS;
         };
         Shell.prototype.shellClearMem = function () {
             //If there are active processes, don't allow user to clear memory
-            if (_ActiveArray.length > 0) {
+            if (_CPU.isExecuting == true) {
                 _StdOut.putText("Cannot clear memory while processes are running. Please wait until programs finish executing.");
             }
             else {
@@ -511,7 +638,12 @@ var TSOS;
             //If there are loaded programs then start executing them
             if (_LoadedPrograms.length > 0) {
                 _Kernel.loadReadyQueue();
-                _Kernel.setCPUValuesFromPCB();
+                if (_Scheduler == "priority") {
+                    _Kernel.setCPUValuesFromPCB(_Kernel.findHighestPriority());
+                }
+                else {
+                    _Kernel.setCPUValuesFromPCB(_ReadyQueue.dequeue());
+                }
                 //set _Cpu.isExcuting = true
                 _CPU.isExecuting = true;
             }
@@ -520,9 +652,14 @@ var TSOS;
             }
         };
         Shell.prototype.shellQuantum = function (args) {
-            //change quantum
-            _Quantum = parseInt(args[0]);
-            _StdOut.putText("Quantum is now " + _Quantum);
+            if (_Scheduler == "fcfs" || _Scheduler == "priority") {
+                _StdOut.putText("You cannot change the quantum when the cpu scheduler is set to fcfs or priority.");
+            }
+            else {
+                //change quantum
+                _Quantum = parseInt(args[0]);
+                _StdOut.putText("Quantum is now " + _Quantum);
+            }
         };
         Shell.prototype.shellPS = function () {
             var text;
@@ -551,6 +688,8 @@ var TSOS;
                 }
                 else {
                     clearRQRowTable(1);
+                    clearRQRowTable(2);
+                    clearRQRowTable(3);
                     _CPU.isExecuting = false;
                 }
             }
@@ -560,6 +699,128 @@ var TSOS;
             //Tell user and host log that process has been killed
             _StdOut.putText("Process " + args[0] + " has been killed.");
             TSOS.Control.hostLog("Process " + args[0] + " killed.", "host");
+        };
+        Shell.prototype.shellFormat = function () {
+            if (_CPU.isExecuting == false) {
+                _krnFileSystemDriver.formatDisk();
+                initializeDiskTable();
+                _StdOut.putText("Disk has been formatted.");
+            }
+            else {
+                _StdOut.putText("You may not format the disk while processes are running. Please wait until all processes have finished.");
+            }
+        };
+        Shell.prototype.shellSetScheduler = function (args) {
+            if (_CPU.isExecuting == false) {
+                if (args[0] == undefined) {
+                    _StdOut.putText("Please enter rr, fcfs, or priority after setschedule. The default is rr.");
+                }
+                else if (args[0].toString() == "fcfs" || args[0].toString() == "rr" || args[0].toString() == "priority") {
+                    if (args[0] == _Scheduler) {
+                        _StdOut.putText("The scheduler is already set to " + _Scheduler + ".");
+                    }
+                    else {
+                        _Scheduler = args[0].toString();
+                        if (args[0] == "fcfs") {
+                            _Quantum = 10000;
+                        }
+                        else if (args[0] == "rr") {
+                            _Quantum = 6;
+                        }
+                        _StdOut.putText("Scheduler has been changed to " + args[0] + ".");
+                    }
+                }
+                else {
+                    _StdOut.putText(args[0] + " is an invalid cpu scheduler. Please enter rr, fcfs, or priority.");
+                }
+            }
+            else {
+                _StdOut.putText("You may not change the scheduler while processes are running. Please wait until all processes have finished.");
+            }
+        };
+        Shell.prototype.shellGetScheduler = function () {
+            _StdOut.putText("Current CPU scheduler is " + _Scheduler + ".");
+        };
+        Shell.prototype.shellCreateFile = function (args) {
+            if (_isFormatted == false) {
+                _StdOut.putText("Disk must be formatted in order to create a file. Please enter command 'format'.");
+            }
+            else if (args[0] == null) {
+                _StdOut.putText("Please enter a valid filename. Filenames cannot be longer than 60 characters and cannot contain spaces.");
+            }
+            else if (_krnFileSystemDriver.isDirectoryFull() == true || _krnFileSystemDriver.isDiskDataFull() == true) {
+                _StdOut.putText("Sorry there is not enough room to create a file. Please delete some files in order to continue.");
+            }
+            else if (_krnFileSystemDriver.validFileName(args[0]) == true) {
+                _StdOut.putText("Sorry. This filename already exists. Please choose another.");
+            }
+            else {
+                _krnFileSystemDriver.createFile(args[0]);
+            }
+        };
+        Shell.prototype.shellDeleteFile = function (args) {
+            if (_isFormatted == false) {
+                _StdOut.putText("Disk must be formatted in order to delete a file. Please enter command 'format'.");
+            }
+            else if (args[0] == null) {
+                _StdOut.putText("Please enter a valid filename. Filenames cannot be longer than 60 characters and cannot contain spaces.");
+            }
+            else if (_krnFileSystemDriver.validFileName(args[0]) == false) {
+                _StdOut.putText("File does not exist. Please enter a valid file name.");
+            }
+            else {
+                _krnFileSystemDriver.deleteFile(args[0]);
+                _StdOut.putText("File '" + args[0] + "' successfully deleted.");
+            }
+        };
+        Shell.prototype.shellWriteFile = function (args) {
+            if (_isFormatted == false) {
+                _StdOut.putText("Disk must be formatted in order to wrtie to a file. Please enter command 'format' and then create a file to write to.");
+            }
+            else if (args[0] == null) {
+                _StdOut.putText("Please enter valid file name before the text you wish to write.");
+            }
+            else if (args[1] == null) {
+                _StdOut.putText("Please enter text to write into the file.");
+            }
+            else if (args[1].charAt(0) !== "'" && args[1].charAt(args[1].length) !== "'" && args[1].charAt(0) !== '"' && args[1].charAt(args[1].length) !== '"') {
+                _StdOut.putText("Text must be surrounded in single or double quotes.");
+            }
+            else if (_krnFileSystemDriver.validFileName(args[0]) == false) {
+                _StdOut.putText("File does not exist. Please enter a valid file name.");
+            }
+            else {
+                var text = args.slice(1).join(" ");
+                _krnFileSystemDriver.writeFile(args[0], text);
+                _StdOut.putText("File '" + args[0] + "' successfully written.");
+            }
+        };
+        Shell.prototype.shellReadFile = function (args) {
+            if (_isFormatted == false) {
+                _StdOut.putText("Disk must be formatted in order to read a file. Please enter command 'format'.");
+            }
+            else if (args[0] == null) {
+                _StdOut.putText("Please enter a valid filename. Filenames cannot be longer than 60 characters and cannot contain spaces.");
+            }
+            else if (_krnFileSystemDriver.validFileName(args[0]) == false) {
+                _StdOut.putText("File does not exist. Please enter a valid file name.");
+            }
+            else {
+                _StdOut.putText("Reading file '" + args[0] + "':");
+                _StdOut.advanceLine();
+                _StdOut.putText(_krnFileSystemDriver.readFile(args[0]));
+            }
+        };
+        Shell.prototype.shellListFiles = function () {
+            if (_isFormatted == false) {
+                _StdOut.putText("Disk must be formatted in order list files. Please enter command 'format'.");
+            }
+            else if (_krnFileSystemDriver.isDirectoryEmpty() == true) {
+                _StdOut.putText("There are no files in the File System.");
+            }
+            else {
+                _StdOut.putText(_krnFileSystemDriver.listFiles());
+            }
         };
         return Shell;
     })();

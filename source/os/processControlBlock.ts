@@ -17,12 +17,14 @@ module TSOS {
                     public Segment: number = 0,
                     public Status: string = "",
                     public TurnAroundTime: number = 0,
-                    public WaitTime: number = 0
+                    public WaitTime: number = 0,
+                    public Location: string = "In Memory",
+                    public Priority: number = _DefaultPriority
         ) {
 
         }
 
-        public init(pid, base, segment): void {
+        public init(pid, base, segment, loc): void {
             this.PID = pid;
             this.PC = 0;
             this.Acc = 0;
@@ -35,6 +37,8 @@ module TSOS {
             this.Status = "New";
             this.TurnAroundTime = 0;
             this.WaitTime = 0;
+            this.Location = loc;
+            this.Priority = _DefaultPriority
         }
 
         public updatePCB(pid, pc, acc, x, y, z, base, limit, segment, status, turnaroundtime, waittime): void {
@@ -64,6 +68,8 @@ module TSOS {
             this.Status = "";
             this.TurnAroundTime = 0;
             this.WaitTime = 0;
+            this.Location = "";
+            this.Priority = _DefaultPriority;
         }
 
         public returnPID(pcb: ProcessControlBlock): number {

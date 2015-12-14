@@ -92,6 +92,7 @@ module TSOS {
                     _KernelInterruptQueue.enqueue(new Interrupt(SYSTEMCALLBRK_IRQ , false));
                     throw new Error("The address stored in Memory is not in the correct Memory slot.");
                 }
+
                 //Increment PC
                 this.PC = this.PC + 3;
                 //Update CPU table
@@ -103,17 +104,6 @@ module TSOS {
                 var tempByteTwo = _MemoryManager.getTwoBytesAhead();
                 var littleEndianAddress = tempByteTwo + tempByteOne;
                 var numberAddress = parseInt(littleEndianAddress, 16) + _CurrentProcess.Base;
-                if (_MemoryManager.isValidAddress(numberAddress) == true) {
-                    _Memory.Mem[numberAddress] = this.Acc.toString(16);
-                }
-                else {
-                    Control.hostLog("Cannot store data in Memory. Trying to access different Memory slot.", "Cpu");
-                    _KernelInterruptQueue.enqueue(new Interrupt(SYSTEMCALLBRK_IRQ , false));
-                    throw new Error("Cannot store data in Memory. Trying to access different Memory slot.");
-
-                }
-                //Increment PC
-                this.PC = this.PC + 3;
                 var format;
                 if (this.Acc < 10) {
                     format = formatHexNumb(this.Acc, 2);
@@ -123,6 +113,18 @@ module TSOS {
                     format = this.Acc.toString(16);
                     updateMemoryTable(numberAddress, format);
                 }
+                if (_MemoryManager.isValidAddress(numberAddress) == true) {
+                    _Memory.Mem[numberAddress] = format;
+                }
+                else {
+                    Control.hostLog("Cannot store data in Memory. Trying to access different Memory slot.", "Cpu");
+                    _KernelInterruptQueue.enqueue(new Interrupt(SYSTEMCALLBRK_IRQ , false));
+                    throw new Error("Cannot store data in Memory. Trying to access different Memory slot.");
+
+                }
+                //Increment PC
+                this.PC = this.PC + 3;
+
 
                 //Update Memory Table
                 updateMemoryTable(numberAddress, format);
@@ -141,6 +143,15 @@ module TSOS {
                 if (_MemoryManager.isValidAddress(numberAddress) == true) {
                     temp =  parseInt(_Memory.read(numberAddress), 16);
                     this.Acc = this.Acc + temp;
+                    if (this.Acc < 10) {
+                        format = formatHexNumb(this.Acc, 2);
+                        updateMemoryTable(numberAddress, format);
+                    }
+                    else {
+                        format = this.Acc.toString(16);
+                        updateMemoryTable(numberAddress, format);
+                    }
+                    this.Acc = format;
                 }
                 else {
                     Control.hostLog("The address trying to be accessed is not in the correct Memory slot.", "Cpu");
@@ -268,11 +279,16 @@ module TSOS {
                 if (_MemoryManager.isValidAddress(numberAddress) == true) {
                     var decimal = parseInt(_Memory.read(numberAddress), 16);
                     decimal = decimal + 1;
-                    var hex = decimal.toString(16);
-                    _Memory.Mem[numberAddress] = decimal.toString(16);
+                    if (decimal < 10) {
+                        format = formatHexNumb(decimal, 2);
+                        updateMemoryTable(numberAddress, format);
+                    }
+                    else {
+                        format = decimal.toString(16);
+                        updateMemoryTable(numberAddress, format);
+                    }
 
-                    updateMemoryTable(numberAddress, hex);
-
+                    _Memory.Mem[numberAddress] = format;
                 }
                 else {
                     Control.hostLog("The address stored in Memory is not in the correct Memory slot.", "Cpu");
@@ -291,7 +307,6 @@ module TSOS {
                 //#$02 in X reg = print the 00-terminated string stored at the address in the Y register.
                 var sub = this.Xreg - _CurrentProcess.Base;
                 if (sub == 1) {
-
                     var yvalue = this.Yreg.toString();
                     for(var x = 0; x < yvalue.length; x++){
                         _StdOut.putText(yvalue.charAt(x));

@@ -25,6 +25,7 @@
    <script type="text/javascript" src="distrib/os/console.js"></script>
    <script type="text/javascript" src="distrib/os/deviceDriver.js"></script>
    <script type="text/javascript" src="distrib/os/deviceDriverKeyboard.js"></script>
+    <script type="text/javascript" src="distrib/os/deviceDriverFileSystem.js"></script>
    <script type="text/javascript" src="distrib/os/memoryDescriptor.js"></script>
    <script type="text/javascript" src="distrib/os/memoryManager.js"></script>
    <script type="text/javascript" src="distrib/os/queue.js"></script>
@@ -37,7 +38,7 @@
    <!-- Other Routines -->
    <script type="text/javascript" src="distrib/utils.js"></script>
    <!-- Uncomment this line below to enable GLaDOS testing -->
-    <script type="text/javascript" src="http://www.labouseur.com/courses/os/projects/glados.js"></script>
+    <!--<script type="text/javascript" src="http://www.labouseur.com/courses/os/projects/glados.js"></script> -->
   </head>
 
   <body onload="onDocumentLoad()">
@@ -208,7 +209,7 @@
   </div>
 
   </div>
-  <div id="divRQ" style = "height:250px; width:auto; overflow:auto; padding-left: 50px; padding-top: 10px; float: bottom;">
+  <div id="divRQ" style = "height:150px; width:600px; overflow:auto; padding-left: 50px; padding-top: 10px; align: center;">
       <label>
           Ready Queue
       </label>
@@ -222,7 +223,9 @@
           <th>Base</th>
           <th>Limit</th>
           <th>State</th>
+          <th>Location</th>
           <tr id="RQSlotOne">
+              <td name ="RQ1"></td>
               <td name ="RQ1"></td>
               <td name ="RQ1"></td>
               <td name ="RQ1"></td>
@@ -243,8 +246,10 @@
               <td name ="RQ2"></td>
               <td name ="RQ2"></td>
               <td name ="RQ2"></td>
+              <td name ="RQ2"></td>
           </tr>
           <tr id="RQSlotThree">
+              <td name ="RQ3"></td>
               <td name ="RQ3"></td>
               <td name ="RQ3"></td>
               <td name ="RQ3"></td>
@@ -258,6 +263,12 @@
       </table>
   </div>
 
+  <div id="divDisk" style = "height:300px; width:auto; overflow:auto; padding-top: 10px; float: bottom;">
+      <label>
+          Hard Drive
+      </label>
+      <table id="diskTable" border="1" bgcolor="white" >
+      </table>
 
   <p class="footerText" style="clear:both;">
      <br>

@@ -37,6 +37,12 @@ var _Memory: TSOS.Memory; // Memory
 
 var _MemorySize: number = 768;
 
+var test = "";
+
+var test2 = "";
+
+var _DefaultPriority: number = 5;
+
 var _MemoryDescriptor: TSOS.MemoryDescriptor;
 
 var _MemoryManager: TSOS.MemoryManager; //Memory Manager
@@ -80,6 +86,11 @@ var _TerminatedQueue: any = null;
 //Array storing Active Process PIDs
 var _ActiveArray;
 
+//Temporary Queue for Sorting Priority
+var _PriorityQueue: any = null;
+
+var _HighestPriority: number = 1000000;
+
 //var _ShellStatus = "Initialized";
 // Standard input and output
 var _StdIn;    // Same "to null or not to null" issue as above.
@@ -98,6 +109,9 @@ var _ProgramCount = 0;
 
 //Time program has been executing
 var _ExecuteTime  = 0;
+
+//Scheduler
+var _Scheduler = "rr";
 
 //PCB
 var _PCB: TSOS.ProcessControlBlock;
@@ -119,8 +133,12 @@ var _SarcasticMode: boolean = false;
 
 // Global Device Driver Objects - page 12
 var _krnKeyboardDriver; //  = null;
-
+var _krnFileSystemDriver;
 var _hardwareClockID: number = null;
+
+var _isFormatted = false;
+var _isProgram = false;
+var _ProgramsOnDiskCount = -1;
 
 // For testing (and enrichment)...
 var Glados: any = null;  // This is the function Glados() in glados.js on Labouseur.com.

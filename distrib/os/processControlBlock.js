@@ -4,7 +4,7 @@
 var TSOS;
 (function (TSOS) {
     var ProcessControlBlock = (function () {
-        function ProcessControlBlock(PID, PC, Acc, Xreg, Yreg, Zflag, Base, Limit, Segment, Status, TurnAroundTime, WaitTime) {
+        function ProcessControlBlock(PID, PC, Acc, Xreg, Yreg, Zflag, Base, Limit, Segment, Status, TurnAroundTime, WaitTime, Location, Priority) {
             if (PID === void 0) { PID = 0; }
             if (PC === void 0) { PC = 0; }
             if (Acc === void 0) { Acc = 0; }
@@ -17,6 +17,8 @@ var TSOS;
             if (Status === void 0) { Status = ""; }
             if (TurnAroundTime === void 0) { TurnAroundTime = 0; }
             if (WaitTime === void 0) { WaitTime = 0; }
+            if (Location === void 0) { Location = "In Memory"; }
+            if (Priority === void 0) { Priority = _DefaultPriority; }
             this.PID = PID;
             this.PC = PC;
             this.Acc = Acc;
@@ -29,8 +31,10 @@ var TSOS;
             this.Status = Status;
             this.TurnAroundTime = TurnAroundTime;
             this.WaitTime = WaitTime;
+            this.Location = Location;
+            this.Priority = Priority;
         }
-        ProcessControlBlock.prototype.init = function (pid, base, segment) {
+        ProcessControlBlock.prototype.init = function (pid, base, segment, loc) {
             this.PID = pid;
             this.PC = 0;
             this.Acc = 0;
@@ -43,6 +47,8 @@ var TSOS;
             this.Status = "New";
             this.TurnAroundTime = 0;
             this.WaitTime = 0;
+            this.Location = loc;
+            this.Priority = _DefaultPriority;
         };
         ProcessControlBlock.prototype.updatePCB = function (pid, pc, acc, x, y, z, base, limit, segment, status, turnaroundtime, waittime) {
             this.PID = pid;
@@ -70,6 +76,8 @@ var TSOS;
             this.Status = "";
             this.TurnAroundTime = 0;
             this.WaitTime = 0;
+            this.Location = "";
+            this.Priority = _DefaultPriority;
         };
         ProcessControlBlock.prototype.returnPID = function (pcb) {
             return pcb.PID;

@@ -40,8 +40,8 @@ var TSOS;
         Queue.prototype.get = function (pos) {
             return this.q[pos];
         };
-        Queue.prototype.set = function (pos) {
-            this.q.splice(pos, 1);
+        Queue.prototype.set = function (pos, value) {
+            this.q[pos] = value;
         };
         return Queue;
     })();

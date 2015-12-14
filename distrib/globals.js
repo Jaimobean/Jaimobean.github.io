@@ -26,6 +26,9 @@ var SCHEDULER_IRQ = 4;
 var _CPU; // Utilize TypeScript's type annotation system to ensure that _CPU is an instance of the Cpu class.
 var _Memory; // Memory
 var _MemorySize = 768;
+var test = "";
+var test2 = "";
+var _DefaultPriority = 5;
 var _MemoryDescriptor;
 var _MemoryManager; //Memory Manager
 var _CurrentSeg = 0;
@@ -54,6 +57,9 @@ var _ResidentQueue = null;
 var _TerminatedQueue = null;
 //Array storing Active Process PIDs
 var _ActiveArray;
+//Temporary Queue for Sorting Priority
+var _PriorityQueue = null;
+var _HighestPriority = 1000000;
 //var _ShellStatus = "Initialized";
 // Standard input and output
 var _StdIn; // Same "to null or not to null" issue as above.
@@ -68,6 +74,8 @@ var _CycleCounter = 0;
 var _ProgramCount = 0;
 //Time program has been executing
 var _ExecuteTime = 0;
+//Scheduler
+var _Scheduler = "rr";
 //PCB
 var _PCB;
 //Next location address
@@ -82,7 +90,11 @@ var _CommandIndex = 0;
 var _SarcasticMode = false;
 // Global Device Driver Objects - page 12
 var _krnKeyboardDriver; //  = null;
+var _krnFileSystemDriver;
 var _hardwareClockID = null;
+var _isFormatted = false;
+var _isProgram = false;
+var _ProgramsOnDiskCount = -1;
 // For testing (and enrichment)...
 var Glados = null; // This is the function Glados() in glados.js on Labouseur.com.
 var _GLaDOS = null; // If the above is linked in, this is the instantiated instance of Glados.

@@ -78,5 +78,16 @@ module TSOS {
             nextByte = _Memory.read(_CPU.PC + 2);
             return nextByte;
         }
+
+        public segmentToString(segnum) {
+            var data = "";
+            var counter= 0;
+            for (var x = this.MMU[segnum].base; x <= this.MMU[segnum].limit; x++) {
+                data = data + _Memory.read(x);
+                counter = counter + 1;
+            }
+
+            return data;
+        }
     }
 }
